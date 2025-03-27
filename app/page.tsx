@@ -1,7 +1,5 @@
 "use client";
 
-import type React from "react";
-
 import { useState, useEffect } from "react";
 import { Plus, Trash, X, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,7 +28,6 @@ export default function ShoppingList() {
   const [newItemQuantity, setNewItemQuantity] = useState("1");
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
-  // Load items from localStorage on component mount
   useEffect(() => {
     const savedItems = localStorage.getItem("shoppingItems");
     if (savedItems) {
@@ -38,7 +35,6 @@ export default function ShoppingList() {
     }
   }, []);
 
-  // Save items to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem("shoppingItems", JSON.stringify(items));
   }, [items]);
@@ -47,7 +43,7 @@ export default function ShoppingList() {
     e.preventDefault();
 
     if (
-      newItemName.trim() === "" ||
+      !newItemName.trim() ||
       isNaN(Number(newItemPrice)) ||
       Number(newItemPrice) <= 0 ||
       isNaN(Number(newItemQuantity)) ||
@@ -97,10 +93,10 @@ export default function ShoppingList() {
   );
 
   return (
-    <div className="container max-w-md mx-auto py-8 px-4 space-y-4">
-      <Card className="bg-gray-800 border border-gray-700">
-        <CardHeader className="border-b border-gray-700">
-          <CardTitle className="text-center text-white">
+    <div className="container max-w-md mx-auto py-8 px-4">
+      <Card className="bg-white border border-gray-300 shadow-md">
+        <CardHeader>
+          <CardTitle className="text-center text-black">
             Lista de Compras
           </CardTitle>
         </CardHeader>
@@ -108,7 +104,7 @@ export default function ShoppingList() {
           <form onSubmit={addItem} className="space-y-4 mb-6">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="item-name" className="text-white">
+                <Label htmlFor="item-name" className="text-black">
                   Item
                 </Label>
                 <Input
@@ -118,11 +114,11 @@ export default function ShoppingList() {
                   value={newItemName}
                   onChange={(e) => setNewItemName(e.target.value)}
                   required
-                  className="bg-gray-700 text-white"
+                  className="border border-gray-300"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="item-price" className="text-white">
+                <Label htmlFor="item-price" className="text-black">
                   Preço
                 </Label>
                 <Input
@@ -134,11 +130,11 @@ export default function ShoppingList() {
                   value={newItemPrice}
                   onChange={(e) => setNewItemPrice(e.target.value)}
                   required
-                  className="bg-gray-700 text-white"
+                  className="border border-gray-300"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="item-quantity" className="text-white">
+                <Label htmlFor="item-quantity" className="text-black">
                   Qtd
                 </Label>
                 <Input
@@ -150,16 +146,12 @@ export default function ShoppingList() {
                   value={newItemQuantity}
                   onChange={(e) => setNewItemQuantity(e.target.value)}
                   required
-                  className="bg-gray-700 text-white"
+                  className="border border-gray-300"
                 />
               </div>
             </div>
-            <Button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Adicionar Item
+            <Button type="submit" className="w-full bg-black text-white">
+              <Plus className="h-4 w-4 mr-2" /> Adicionar Item
             </Button>
           </form>
 
@@ -169,128 +161,64 @@ export default function ShoppingList() {
                 {items.map((item) => (
                   <li
                     key={item.id}
-                    className="p-4 border border-gray-700 rounded-md bg-gray-800"
+                    className="p-4 border border-gray-300 rounded-md bg-gray-100"
                   >
-                    {editingItemId === item.id ? (
-                      <div className="flex flex-col space-y-2">
-                        <div className="font-medium text-white">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-black">
                           {item.name}
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                          <div className="space-y-1">
-                            <Label
-                              htmlFor={`price-${item.id}`}
-                              className="text-xs text-white"
-                            >
-                              Preço
-                            </Label>
-                            <Input
-                              id={`price-${item.id}`}
-                              value={item.price}
-                              type="number"
-                              min="0.01"
-                              step="0.01"
-                              onChange={(e) =>
-                                updateItem(item.id, {
-                                  price: Number(e.target.value),
-                                })
-                              }
-                              className="bg-gray-700 text-white"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <Label
-                              htmlFor={`quantity-${item.id}`}
-                              className="text-xs text-white"
-                            >
-                              Quantidade
-                            </Label>
-                            <Input
-                              id={`quantity-${item.id}`}
-                              value={item.quantity}
-                              type="number"
-                              min="1"
-                              step="1"
-                              onChange={(e) =>
-                                updateItem(item.id, {
-                                  quantity: Number(e.target.value),
-                                })
-                              }
-                              className="bg-gray-700 text-white"
-                            />
-                          </div>
-                          <div className="flex items-end justify-end">
-                            <Button
-                              size="sm"
-                              onClick={finishEditing}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              Concluir
-                            </Button>
-                          </div>
-                        </div>
+                        </span>
+                        <span className="text-sm text-gray-600">
+                          R$ {item.price.toFixed(2)} × {item.quantity}
+                        </span>
                       </div>
-                    ) : (
-                      <div className="flex items-center justify-between">
-                        <div className="flex flex-col">
-                          <span className="font-medium text-white">
-                            {item.name}
-                          </span>
-                          <span className="text-sm text-gray-400">
-                            R$ {item.price.toFixed(2)} × {item.quantity}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-white">
-                            R$ {(item.price * item.quantity).toFixed(2)}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => startEditing(item)}
-                            className="h-8 w-8 bg-gray-600 hover:bg-gray-700"
-                          >
-                            <Pencil className="h-4 w-4 text-white" />
-                            <span className="sr-only">Editar {item.name}</span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeItem(item.id)}
-                            className="h-8 w-8 text-red-600"
-                          >
-                            <X className="h-4 w-4" />
-                            <span className="sr-only">Remover {item.name}</span>
-                          </Button>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-black">
+                          R$ {(item.price * item.quantity).toFixed(2)}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => startEditing(item)}
+                          className="h-8 w-8 text-black"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeItem(item.id)}
+                          className="h-8 w-8 text-red-500"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
-                    )}
+                    </div>
                   </li>
                 ))}
               </ul>
 
-              <Separator className="border-gray-700" />
+              <Separator />
 
-              <div className="flex items-center justify-between font-bold text-white">
+              <div className="flex items-center justify-between font-bold text-black">
                 <span>Total:</span>
                 <span>R$ {total.toFixed(2)}</span>
               </div>
             </div>
           ) : (
-            <div className="text-center py-6 text-gray-400">
+            <div className="text-center py-6 text-gray-500">
               Sua lista está vazia. Adicione alguns itens!
             </div>
           )}
         </CardContent>
         {items.length > 0 && (
-          <CardFooter className="bg-gray-800">
+          <CardFooter>
             <Button
               variant="destructive"
-              className="w-full bg-red-600 hover:bg-red-700"
+              className="w-full bg-red-500 text-white"
               onClick={clearList}
             >
-              <Trash className="h-4 w-4 mr-2" />
-              Limpar Lista
+              <Trash className="h-4 w-4 mr-2" /> Limpar Lista
             </Button>
           </CardFooter>
         )}
