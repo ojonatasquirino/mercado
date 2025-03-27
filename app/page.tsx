@@ -97,14 +97,16 @@ export default function ShoppingList() {
   );
 
   return (
-    <div className="container max-w-md mx-auto py-8 px-4 bg-black text-white">
-      <Card className="bg-gray-800 text-white">
-        <CardHeader>
-          <CardTitle className="text-center">Lista de Compras</CardTitle>
+    <div className="container max-w-md mx-auto py-8 px-4 space-y-4">
+      <Card className="bg-gray-800 border border-gray-700">
+        <CardHeader className="border-b border-gray-700">
+          <CardTitle className="text-center text-white">
+            Lista de Compras
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={addItem} className="space-y-4 mb-6">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="item-name" className="text-white">
                   Item
@@ -152,7 +154,10 @@ export default function ShoppingList() {
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full bg-gray-600">
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Adicionar Item
             </Button>
@@ -164,12 +169,14 @@ export default function ShoppingList() {
                 {items.map((item) => (
                   <li
                     key={item.id}
-                    className="p-2 border rounded-md bg-gray-700"
+                    className="p-4 border border-gray-700 rounded-md bg-gray-800"
                   >
                     {editingItemId === item.id ? (
                       <div className="flex flex-col space-y-2">
-                        <div className="font-medium">{item.name}</div>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="font-medium text-white">
+                          {item.name}
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                           <div className="space-y-1">
                             <Label
                               htmlFor={`price-${item.id}`}
@@ -216,7 +223,7 @@ export default function ShoppingList() {
                             <Button
                               size="sm"
                               onClick={finishEditing}
-                              className="bg-gray-600"
+                              className="bg-green-600 hover:bg-green-700"
                             >
                               Concluir
                             </Button>
@@ -226,29 +233,31 @@ export default function ShoppingList() {
                     ) : (
                       <div className="flex items-center justify-between">
                         <div className="flex flex-col">
-                          <span className="font-medium">{item.name}</span>
-                          <span className="text-sm text-muted-foreground">
+                          <span className="font-medium text-white">
+                            {item.name}
+                          </span>
+                          <span className="text-sm text-gray-400">
                             R$ {item.price.toFixed(2)} × {item.quantity}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="font-medium">
+                          <span className="font-medium text-white">
                             R$ {(item.price * item.quantity).toFixed(2)}
                           </span>
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => startEditing(item)}
-                            className="h-8 w-8 bg-gray-600"
+                            className="h-8 w-8 bg-gray-600 hover:bg-gray-700"
                           >
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="h-4 w-4 text-white" />
                             <span className="sr-only">Editar {item.name}</span>
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => removeItem(item.id)}
-                            className="h-8 w-8 text-destructive"
+                            className="h-8 w-8 text-red-600"
                           >
                             <X className="h-4 w-4" />
                             <span className="sr-only">Remover {item.name}</span>
@@ -260,28 +269,28 @@ export default function ShoppingList() {
                 ))}
               </ul>
 
-              <Separator />
+              <Separator className="border-gray-700" />
 
-              <div className="flex items-center justify-between font-bold">
+              <div className="flex items-center justify-between font-bold text-white">
                 <span>Total:</span>
                 <span>R$ {total.toFixed(2)}</span>
               </div>
             </div>
           ) : (
-            <div className="text-center py-6 text-muted-foreground">
-              Sua lista está vazia. Adicione itens!
+            <div className="text-center py-6 text-gray-400">
+              Sua lista está vazia. Adicione alguns itens!
             </div>
           )}
         </CardContent>
         {items.length > 0 && (
-          <CardFooter>
+          <CardFooter className="bg-gray-800">
             <Button
               variant="destructive"
-              className="w-full bg-gray-600"
+              className="w-full bg-red-600 hover:bg-red-700"
               onClick={clearList}
             >
               <Trash className="h-4 w-4 mr-2" />
-              Limpar
+              Limpar Lista
             </Button>
           </CardFooter>
         )}
