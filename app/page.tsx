@@ -97,8 +97,8 @@ export default function ShoppingList() {
   );
 
   return (
-    <div className="container max-w-md mx-auto py-8 px-4">
-      <Card>
+    <div className="container max-w-md mx-auto py-8 px-4 bg-black text-white">
+      <Card className="bg-gray-800 text-white">
         <CardHeader>
           <CardTitle className="text-center">Lista de Compras</CardTitle>
         </CardHeader>
@@ -106,7 +106,9 @@ export default function ShoppingList() {
           <form onSubmit={addItem} className="space-y-4 mb-6">
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="item-name">Item</Label>
+                <Label htmlFor="item-name" className="text-white">
+                  Item
+                </Label>
                 <Input
                   id="item-name"
                   type="text"
@@ -114,10 +116,13 @@ export default function ShoppingList() {
                   value={newItemName}
                   onChange={(e) => setNewItemName(e.target.value)}
                   required
+                  className="bg-gray-700 text-white"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="item-price">Preço</Label>
+                <Label htmlFor="item-price" className="text-white">
+                  Preço
+                </Label>
                 <Input
                   id="item-price"
                   type="number"
@@ -127,10 +132,13 @@ export default function ShoppingList() {
                   value={newItemPrice}
                   onChange={(e) => setNewItemPrice(e.target.value)}
                   required
+                  className="bg-gray-700 text-white"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="item-quantity">Qtd</Label>
+                <Label htmlFor="item-quantity" className="text-white">
+                  Qtd
+                </Label>
                 <Input
                   id="item-quantity"
                   type="number"
@@ -140,10 +148,11 @@ export default function ShoppingList() {
                   value={newItemQuantity}
                   onChange={(e) => setNewItemQuantity(e.target.value)}
                   required
+                  className="bg-gray-700 text-white"
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full bg-gray-600">
               <Plus className="h-4 w-4 mr-2" />
               Adicionar Item
             </Button>
@@ -153,7 +162,10 @@ export default function ShoppingList() {
             <div className="space-y-4">
               <ul className="space-y-2">
                 {items.map((item) => (
-                  <li key={item.id} className="p-2 border rounded-md">
+                  <li
+                    key={item.id}
+                    className="p-2 border rounded-md bg-gray-700"
+                  >
                     {editingItemId === item.id ? (
                       <div className="flex flex-col space-y-2">
                         <div className="font-medium">{item.name}</div>
@@ -161,7 +173,7 @@ export default function ShoppingList() {
                           <div className="space-y-1">
                             <Label
                               htmlFor={`price-${item.id}`}
-                              className="text-xs"
+                              className="text-xs text-white"
                             >
                               Preço
                             </Label>
@@ -176,12 +188,13 @@ export default function ShoppingList() {
                                   price: Number(e.target.value),
                                 })
                               }
+                              className="bg-gray-700 text-white"
                             />
                           </div>
                           <div className="space-y-1">
                             <Label
                               htmlFor={`quantity-${item.id}`}
-                              className="text-xs"
+                              className="text-xs text-white"
                             >
                               Quantidade
                             </Label>
@@ -196,10 +209,15 @@ export default function ShoppingList() {
                                   quantity: Number(e.target.value),
                                 })
                               }
+                              className="bg-gray-700 text-white"
                             />
                           </div>
                           <div className="flex items-end justify-end">
-                            <Button size="sm" onClick={finishEditing}>
+                            <Button
+                              size="sm"
+                              onClick={finishEditing}
+                              className="bg-gray-600"
+                            >
                               Concluir
                             </Button>
                           </div>
@@ -221,7 +239,7 @@ export default function ShoppingList() {
                             variant="ghost"
                             size="icon"
                             onClick={() => startEditing(item)}
-                            className="h-8 w-8"
+                            className="h-8 w-8 bg-gray-600"
                           >
                             <Pencil className="h-4 w-4" />
                             <span className="sr-only">Editar {item.name}</span>
@@ -251,7 +269,7 @@ export default function ShoppingList() {
             </div>
           ) : (
             <div className="text-center py-6 text-muted-foreground">
-              Sua lista está vazia. Adicione alguns itens!
+              Sua lista está vazia. Adicione itens!
             </div>
           )}
         </CardContent>
@@ -259,11 +277,11 @@ export default function ShoppingList() {
           <CardFooter>
             <Button
               variant="destructive"
-              className="w-full"
+              className="w-full bg-gray-600"
               onClick={clearList}
             >
               <Trash className="h-4 w-4 mr-2" />
-              Limpar Lista
+              Limpar
             </Button>
           </CardFooter>
         )}
