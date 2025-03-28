@@ -1,4 +1,3 @@
-
 # <div align="center"><a href='https://mercado-lista.vercel.app'>Mercado Lista</a></div>
 
 <p align="center">
@@ -17,7 +16,8 @@
 - **NextJS** → Framework para aplicações React.
 - **React** → Biblioteca para interfaces interativas.
 - **TailwindCSS (V4)** → Estilização utilitária e responsiva.
-- **Local Storage** → Armazenamento de informações no navegador. 
+- **Shadcn UI** → Biblioteca de componentes.
+- **Local Storage** → Armazenamento de informações no navegador.
 
 ##
 
