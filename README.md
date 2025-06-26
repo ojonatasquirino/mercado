@@ -1,4 +1,4 @@
-# <div align="center"><a href='https://mercado-lista.vercel.app'>Mercado Lista</a></div>
+# <div align="center"><a href='https://mercado-lista.vercel.app'>Mercado</a></div>
 
 <p align="center">
   <image
