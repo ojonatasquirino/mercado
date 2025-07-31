@@ -29,7 +29,7 @@ export default function ReminderList({ reminders, setReminders, onAddToShopping 
       name: newItemName.trim(),
     }
 
-    setReminders([...reminders, newReminder])
+    setReminders([newReminder, ...reminders]) // Novo item adicionado no início da lista
     setNewItemName("")
   }
 

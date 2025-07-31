@@ -52,9 +52,10 @@ export default function ShoppingList({ shoppingItems, setShoppingItems }: Shoppi
                     <Input
                       type="number"
                       min="1"
-                      value={item.quantity}
-                      onChange={(e) => updateItem(item.id, { quantity: Number(e.target.value) || 1 })}
+                      value={item.quantity || ""} // Mudança aqui: mostrar vazio se for 0
+                      onChange={(e) => updateItem(item.id, { quantity: Number(e.target.value) || 0 })}
                       className="text-base h-10"
+                      placeholder="0"
                     />
                   </div>
                   <div className="space-y-1">
@@ -63,7 +64,7 @@ export default function ShoppingList({ shoppingItems, setShoppingItems }: Shoppi
                       type="number"
                       min="0"
                       step="0.01"
-                      value={item.price}
+                      value={item.price || ""} // Mudança aqui: mostrar vazio se for 0
                       onChange={(e) => updateItem(item.id, { price: Number(e.target.value) || 0 })}
                       className="text-base h-10"
                       placeholder="0,00"
