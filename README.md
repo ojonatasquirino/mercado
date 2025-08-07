@@ -2,13 +2,13 @@
 
 <p align="center">
   <image
-  src="https://img.shields.io/github/languages/count/ojonatasquirino/mercado-lista"
+  src="https://img.shields.io/github/languages/count/ojonatasquirino/mercado"
   />
   <image
-  src="https://img.shields.io/github/languages/top/ojonatasquirino/mercado-lista"
+  src="https://img.shields.io/github/languages/top/ojonatasquirino/mercado"
   />
   <image
-  src="https://img.shields.io/github/last-commit/ojonatasquirino/mercado-lista"
+  src="https://img.shields.io/github/last-commit/ojonatasquirino/mercado"
   />
 
 </p>
@@ -26,6 +26,6 @@
 ## Instalação e uso
 
 ```bash
-→ git clone https://github.com/ojonatasquirino/mercado-lista.git
+git clone https://github.com/ojonatasquirino/mercado-lista.git
 
 ```
