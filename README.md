@@ -26,6 +26,6 @@
 ## Instalação e uso
 
 ```bash
-git clone https://github.com/ojonatasquirino/mercado-lista.git
+git clone https://github.com/ojonatasquirino/mercado.git
 
 ```
