@@ -21,7 +21,8 @@ export default function PurchaseSummary({ shoppingItems, totalSpent, onBack, onN
   const categoryTotals = shoppingItems.reduce(
     (acc, item) => {
       const total = item.quantity * item.price
-      acc[item.category] = (acc[item.category] || 0) + total
+      const category = item.category || "Outros" // Fallback para categoria
+      acc[category] = (acc[category] || 0) + total
       return acc
     },
     {} as Record<string, number>,
@@ -32,10 +33,11 @@ export default function PurchaseSummary({ shoppingItems, totalSpent, onBack, onN
   // Agrupar itens por categoria
   const itemsByCategory = shoppingItems.reduce(
     (acc, item) => {
-      if (!acc[item.category]) {
-        acc[item.category] = []
+      const category = item.category || "Outros" // Fallback para categoria
+      if (!acc[category]) {
+        acc[category] = []
       }
-      acc[item.category].push(item)
+      acc[category].push(item)
       return acc
     },
     {} as Record<string, ShoppingItem[]>,
@@ -166,7 +168,7 @@ export default function PurchaseSummary({ shoppingItems, totalSpent, onBack, onN
                 {Object.entries(categoryTotals)
                   .sort(([, a], [, b]) => b - a)
                   .map(([category, total]) => {
-                    const percentage = (total / maxCategoryValue) * 100
+                    const percentage = maxCategoryValue > 0 ? (total / maxCategoryValue) * 100 : 0
                     return (
                       <div key={category} className="space-y-1">
                         <div className="flex justify-between text-sm">

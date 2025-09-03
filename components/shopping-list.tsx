@@ -4,8 +4,10 @@ import { Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import type { ShoppingItem } from "@/app/page"
+import { categories } from "@/app/page"
 
 interface ShoppingListProps {
   shoppingItems: ShoppingItem[]
@@ -46,13 +48,13 @@ export default function ShoppingList({ shoppingItems, setShoppingItems }: Shoppi
                   </Button>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label className="text-xs">Quantidade</Label>
                     <Input
                       type="number"
                       min="1"
-                      value={item.quantity || ""} // Mudança aqui: mostrar vazio se for 0
+                      value={item.quantity || ""}
                       onChange={(e) => updateItem(item.id, { quantity: Number(e.target.value) || 0 })}
                       className="text-base h-10"
                       placeholder="0"
@@ -64,11 +66,29 @@ export default function ShoppingList({ shoppingItems, setShoppingItems }: Shoppi
                       type="number"
                       min="0"
                       step="0.01"
-                      value={item.price || ""} // Mudança aqui: mostrar vazio se for 0
+                      value={item.price || ""}
                       onChange={(e) => updateItem(item.id, { price: Number(e.target.value) || 0 })}
                       className="text-base h-10"
                       placeholder="0,00"
                     />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Categoria</Label>
+                    <Select value={item.category} onValueChange={(value) => updateItem(item.id, { category: value })}>
+                      <SelectTrigger className="h-10">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs">Subtotal</Label>

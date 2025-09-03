@@ -3,12 +3,15 @@
 import { useState, useEffect } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { ShoppingBag } from "lucide-react"
 import ReminderList from "@/components/reminder-list"
 import ShoppingList from "@/components/shopping-list"
 import SavedLists from "@/components/saved-lists"
 import BudgetTracker from "@/components/budget-tracker"
 import ScrollToTop from "@/components/scroll-to-top"
 import ScrollToBottom from "@/components/scroll-to-bottom"
+import PurchaseSummary from "@/components/purchase-summary"
 
 export interface ReminderItem {
   id: string
@@ -20,6 +23,7 @@ export interface ShoppingItem {
   name: string
   price: number
   quantity: number
+  category: string
 }
 
 export interface SavedList {
@@ -29,11 +33,24 @@ export interface SavedList {
   createdAt: Date
 }
 
+export const categories = [
+  "Frutas",
+  "Verduras",
+  "Padaria",
+  "Laticínios",
+  "Carnes",
+  "Higiene",
+  "Limpeza",
+  "Bebidas",
+  "Outros",
+]
+
 export default function ShoppingApp() {
   const [reminders, setReminders] = useState<ReminderItem[]>([])
   const [shoppingItems, setShoppingItems] = useState<ShoppingItem[]>([])
   const [savedLists, setSavedLists] = useState<SavedList[]>([])
   const [budget, setBudget] = useState<number>(0)
+  const [showSummary, setShowSummary] = useState(false)
 
   // Load data from localStorage on component mount
   useEffect(() => {
@@ -46,7 +63,13 @@ export default function ShoppingApp() {
       setReminders(JSON.parse(savedReminders))
     }
     if (savedShoppingItems) {
-      setShoppingItems(JSON.parse(savedShoppingItems))
+      const parsedItems = JSON.parse(savedShoppingItems)
+      // Garantir que todos os itens tenham a propriedade category
+      const itemsWithCategory = parsedItems.map((item: any) => ({
+        ...item,
+        category: item.category || "Outros",
+      }))
+      setShoppingItems(itemsWithCategory)
     }
     if (savedListsData) {
       setSavedLists(JSON.parse(savedListsData))
@@ -79,6 +102,7 @@ export default function ShoppingApp() {
       name: reminder.name,
       price: 0,
       quantity: 0,
+      category: "Outros",
     }
 
     setShoppingItems([newShoppingItem, ...shoppingItems])
@@ -93,16 +117,46 @@ export default function ShoppingApp() {
     setReminders([...newReminders, ...reminders])
   }
 
+  const handleFinalizePurchase = () => {
+    if (shoppingItems.length === 0) return
+    setShowSummary(true)
+  }
+
   const totalSpent = shoppingItems.reduce((sum, item) => sum + item.quantity * item.price, 0)
   const totalItems =
     reminders.length + shoppingItems.length + savedLists.reduce((sum, list) => sum + list.items.length, 0)
+
+  if (showSummary) {
+    return (
+      <PurchaseSummary
+        shoppingItems={shoppingItems}
+        totalSpent={totalSpent}
+        onBack={() => setShowSummary(false)}
+        onNewPurchase={() => {
+          setShoppingItems([])
+          setShowSummary(false)
+        }}
+      />
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container max-w-md mx-auto py-6 px-4">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-center">Mercado</CardTitle>
+          <CardHeader className="text-center pb-4">
+            <CardTitle className="text-2xl font-bold">Mercado</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              desenvolvido com ❤️ por{" "}
+              <a
+                href="https://ojonatasquirino.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-primary transition-colors"
+              >
+                ojonatasquirino.com
+              </a>
+            </p>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
@@ -129,7 +183,19 @@ export default function ShoppingApp() {
                 </TabsContent>
 
                 <TabsContent value="shopping" className="mt-6">
-                  <ShoppingList shoppingItems={shoppingItems} setShoppingItems={setShoppingItems} />
+                  <div className="space-y-4">
+                    <ShoppingList shoppingItems={shoppingItems} setShoppingItems={setShoppingItems} />
+
+                    {shoppingItems.length > 0 && (
+                      <Button
+                        onClick={handleFinalizePurchase}
+                        className="w-full h-12 text-base bg-green-600 hover:bg-green-700"
+                      >
+                        <ShoppingBag className="h-5 w-5 mr-2" />
+                        Finalizar Compra
+                      </Button>
+                    )}
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="saved" className="mt-6">
