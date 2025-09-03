@@ -20,20 +20,22 @@ export default function PurchaseSummary({ shoppingItems, totalSpent, onBack, onN
   // Calcular totais por categoria
   const categoryTotals = shoppingItems.reduce(
     (acc, item) => {
-      const total = item.quantity * item.price
-      const category = item.category || "Outros" // Fallback para categoria
+      const quantity = Number(item.quantity) || 0
+      const price = Number(item.price) || 0
+      const total = quantity * price
+      const category = item.category || "Outros"
       acc[category] = (acc[category] || 0) + total
       return acc
     },
     {} as Record<string, number>,
   )
 
-  const maxCategoryValue = Math.max(...Object.values(categoryTotals))
+  const maxCategoryValue = Math.max(...Object.values(categoryTotals), 1) // Evitar divisão por zero
 
   // Agrupar itens por categoria
   const itemsByCategory = shoppingItems.reduce(
     (acc, item) => {
-      const category = item.category || "Outros" // Fallback para categoria
+      const category = item.category || "Outros"
       if (!acc[category]) {
         acc[category] = []
       }
@@ -70,11 +72,14 @@ export default function PurchaseSummary({ shoppingItems, totalSpent, onBack, onN
       Object.entries(itemsByCategory)
         .sort(
           ([, a], [, b]) =>
-            b.reduce((sum, item) => sum + item.quantity * item.price, 0) -
-            a.reduce((sum, item) => sum + item.quantity * item.price, 0),
+            b.reduce((sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0) -
+            a.reduce((sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0),
         )
         .forEach(([category, items]) => {
-          const categoryTotal = items.reduce((sum, item) => sum + item.quantity * item.price, 0)
+          const categoryTotal = items.reduce(
+            (sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.price) || 0),
+            0,
+          )
 
           // Verificar se precisa de nova página
           if (yPosition > 250) {
@@ -98,8 +103,10 @@ export default function PurchaseSummary({ shoppingItems, totalSpent, onBack, onN
           pdf.setFont("helvetica", "normal")
 
           items.forEach((item) => {
-            const subtotal = item.quantity * item.price
-            const itemText = `${item.name} - ${item.quantity}x R$ ${item.price.toFixed(2)} = R$ ${subtotal.toFixed(2)}`
+            const quantity = Number(item.quantity) || 0
+            const price = Number(item.price) || 0
+            const subtotal = quantity * price
+            const itemText = `${item.name} - ${quantity}x R$ ${price.toFixed(2)} = R$ ${subtotal.toFixed(2)}`
 
             // Verificar se precisa de nova página
             if (yPosition > 270) {
@@ -198,11 +205,14 @@ export default function PurchaseSummary({ shoppingItems, totalSpent, onBack, onN
                 {Object.entries(itemsByCategory)
                   .sort(
                     ([, a], [, b]) =>
-                      b.reduce((sum, item) => sum + item.quantity * item.price, 0) -
-                      a.reduce((sum, item) => sum + item.quantity * item.price, 0),
+                      b.reduce((sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0) -
+                      a.reduce((sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0),
                   )
                   .map(([category, items]) => {
-                    const categoryTotal = items.reduce((sum, item) => sum + item.quantity * item.price, 0)
+                    const categoryTotal = items.reduce(
+                      (sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.price) || 0),
+                      0,
+                    )
                     return (
                       <div key={category} className="space-y-2">
                         <div className="flex justify-between items-center font-semibold text-sm border-b pb-1">
@@ -210,14 +220,19 @@ export default function PurchaseSummary({ shoppingItems, totalSpent, onBack, onN
                           <span>R$ {categoryTotal.toFixed(2)}</span>
                         </div>
                         <div className="space-y-1 ml-3">
-                          {items.map((item) => (
-                            <div key={item.id} className="flex justify-between text-sm text-muted-foreground">
-                              <span>
-                                {item.name} - {item.quantity}x R$ {item.price.toFixed(2)}
-                              </span>
-                              <span>R$ {(item.quantity * item.price).toFixed(2)}</span>
-                            </div>
-                          ))}
+                          {items.map((item) => {
+                            const quantity = Number(item.quantity) || 0
+                            const price = Number(item.price) || 0
+                            const subtotal = quantity * price
+                            return (
+                              <div key={item.id} className="flex justify-between text-sm text-muted-foreground">
+                                <span>
+                                  {item.name} - {quantity}x R$ {price.toFixed(2)}
+                                </span>
+                                <span>R$ {subtotal.toFixed(2)}</span>
+                              </div>
+                            )
+                          })}
                         </div>
                       </div>
                     )

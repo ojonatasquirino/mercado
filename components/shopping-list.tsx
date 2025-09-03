@@ -27,7 +27,11 @@ export default function ShoppingList({ shoppingItems, setShoppingItems }: Shoppi
     setShoppingItems([])
   }
 
-  const total = shoppingItems.reduce((sum, item) => sum + item.quantity * item.price, 0)
+  const total = shoppingItems.reduce((sum, item) => {
+    const quantity = Number(item.quantity) || 0
+    const price = Number(item.price) || 0
+    return sum + quantity * price
+  }, 0)
 
   return (
     <div className="space-y-4">
@@ -93,7 +97,7 @@ export default function ShoppingList({ shoppingItems, setShoppingItems }: Shoppi
                   <div className="space-y-1">
                     <Label className="text-xs">Subtotal</Label>
                     <div className="h-10 px-3 py-2 bg-muted rounded-md flex items-center text-base font-medium">
-                      R$ {(item.quantity * item.price).toFixed(2)}
+                      R$ {((Number(item.quantity) || 0) * (Number(item.price) || 0)).toFixed(2)}
                     </div>
                   </div>
                 </div>

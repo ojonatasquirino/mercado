@@ -3,11 +3,16 @@ import type { Metadata } from "next"
 import { JetBrains_Mono } from "next/font/google"
 import "./globals.css"
 
-const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] })
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   title: "Mercado - Lista de Compras",
   description: "Aplicativo intuitivo para gerenciar suas compras e orçamento",
+  viewport: "width=device-width, initial-scale=1",
 }
 
 export default function RootLayout({
@@ -16,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className={jetbrainsMono.variable}>
       <body className={jetbrainsMono.className}>{children}</body>
     </html>
   )

@@ -43,7 +43,9 @@ export const categories = [
   "Limpeza",
   "Bebidas",
   "Outros",
-]
+] as const
+
+export type Category = (typeof categories)[number]
 
 export default function ShoppingApp() {
   const [reminders, setReminders] = useState<ReminderItem[]>([])
@@ -54,46 +56,87 @@ export default function ShoppingApp() {
 
   // Load data from localStorage on component mount
   useEffect(() => {
-    const savedReminders = localStorage.getItem("reminders")
-    const savedShoppingItems = localStorage.getItem("shoppingItems")
-    const savedListsData = localStorage.getItem("savedLists")
-    const savedBudget = localStorage.getItem("budget")
+    try {
+      const savedReminders = localStorage.getItem("reminders")
+      const savedShoppingItems = localStorage.getItem("shoppingItems")
+      const savedListsData = localStorage.getItem("savedLists")
+      const savedBudget = localStorage.getItem("budget")
 
-    if (savedReminders) {
-      setReminders(JSON.parse(savedReminders))
-    }
-    if (savedShoppingItems) {
-      const parsedItems = JSON.parse(savedShoppingItems)
-      // Garantir que todos os itens tenham a propriedade category
-      const itemsWithCategory = parsedItems.map((item: any) => ({
-        ...item,
-        category: item.category || "Outros",
-      }))
-      setShoppingItems(itemsWithCategory)
-    }
-    if (savedListsData) {
-      setSavedLists(JSON.parse(savedListsData))
-    }
-    if (savedBudget) {
-      setBudget(Number(savedBudget))
+      if (savedReminders) {
+        const parsedReminders = JSON.parse(savedReminders)
+        if (Array.isArray(parsedReminders)) {
+          setReminders(parsedReminders)
+        }
+      }
+
+      if (savedShoppingItems) {
+        const parsedItems = JSON.parse(savedShoppingItems)
+        if (Array.isArray(parsedItems)) {
+          // Garantir que todos os itens tenham a propriedade category
+          const itemsWithCategory = parsedItems.map((item: any) => ({
+            id: item.id || crypto.randomUUID(),
+            name: item.name || "",
+            price: Number(item.price) || 0,
+            quantity: Number(item.quantity) || 0,
+            category: item.category || "Outros",
+          }))
+          setShoppingItems(itemsWithCategory)
+        }
+      }
+
+      if (savedListsData) {
+        const parsedLists = JSON.parse(savedListsData)
+        if (Array.isArray(parsedLists)) {
+          const listsWithDates = parsedLists.map((list: any) => ({
+            ...list,
+            createdAt: new Date(list.createdAt || Date.now()),
+          }))
+          setSavedLists(listsWithDates)
+        }
+      }
+
+      if (savedBudget) {
+        const parsedBudget = Number(savedBudget)
+        if (!isNaN(parsedBudget)) {
+          setBudget(parsedBudget)
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao carregar dados do localStorage:", error)
     }
   }, [])
 
   // Save data to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem("reminders", JSON.stringify(reminders))
+    try {
+      localStorage.setItem("reminders", JSON.stringify(reminders))
+    } catch (error) {
+      console.error("Erro ao salvar lembretes:", error)
+    }
   }, [reminders])
 
   useEffect(() => {
-    localStorage.setItem("shoppingItems", JSON.stringify(shoppingItems))
+    try {
+      localStorage.setItem("shoppingItems", JSON.stringify(shoppingItems))
+    } catch (error) {
+      console.error("Erro ao salvar itens de compra:", error)
+    }
   }, [shoppingItems])
 
   useEffect(() => {
-    localStorage.setItem("savedLists", JSON.stringify(savedLists))
+    try {
+      localStorage.setItem("savedLists", JSON.stringify(savedLists))
+    } catch (error) {
+      console.error("Erro ao salvar listas:", error)
+    }
   }, [savedLists])
 
   useEffect(() => {
-    localStorage.setItem("budget", budget.toString())
+    try {
+      localStorage.setItem("budget", budget.toString())
+    } catch (error) {
+      console.error("Erro ao salvar orçamento:", error)
+    }
   }, [budget])
 
   const addToShopping = (reminder: ReminderItem) => {
@@ -122,7 +165,12 @@ export default function ShoppingApp() {
     setShowSummary(true)
   }
 
-  const totalSpent = shoppingItems.reduce((sum, item) => sum + item.quantity * item.price, 0)
+  const totalSpent = shoppingItems.reduce((sum, item) => {
+    const quantity = Number(item.quantity) || 0
+    const price = Number(item.price) || 0
+    return sum + quantity * price
+  }, 0)
+
   const totalItems =
     reminders.length + shoppingItems.length + savedLists.reduce((sum, list) => sum + list.items.length, 0)
 
