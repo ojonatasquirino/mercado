@@ -150,6 +150,13 @@
       color: hsl(var(--muted-foreground));
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: none;
+    }
+
     /* ---------- buttons ---------- */
     .btn {
       display: inline-flex;
@@ -658,6 +665,122 @@
       color: hsl(var(--foreground));
     }
 
+    /* ---------- calculator ---------- */
+    .calc-dialog {
+      max-width: 340px;
+    }
+
+    .calc-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .calc-head h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .calc-display {
+      background: hsl(var(--muted));
+      border-radius: calc(var(--radius) - 2px);
+      padding: 14px 16px;
+      text-align: right;
+      margin-bottom: 14px;
+      min-height: 82px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 4px;
+      overflow: hidden;
+    }
+
+    .calc-expr {
+      font-size: .9rem;
+      color: hsl(var(--muted-foreground));
+      min-height: 18px;
+      word-break: break-all;
+    }
+
+    .calc-result {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      word-break: break-all;
+      line-height: 1.1;
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .calc-btn {
+      height: 52px;
+      border-radius: calc(var(--radius) - 2px);
+      border: 1px solid hsl(var(--border));
+      background: hsl(var(--card));
+      color: hsl(var(--foreground));
+      font-size: 1.05rem;
+      font-weight: 550;
+      cursor: pointer;
+      transition: background .12s, opacity .12s, transform .05s;
+      display: grid;
+      place-items: center;
+      user-select: none;
+    }
+
+    .calc-btn:hover {
+      background: hsl(var(--accent));
+    }
+
+    .calc-btn:active {
+      transform: translateY(1px);
+    }
+
+    .calc-btn.op {
+      color: hsl(var(--muted-foreground));
+      font-size: 1.2rem;
+    }
+
+    .calc-btn.fn {
+      background: hsl(var(--secondary));
+      border-color: transparent;
+      color: hsl(var(--muted-foreground));
+      font-size: .95rem;
+    }
+
+    .calc-btn.fn:hover {
+      background: hsl(var(--accent));
+    }
+
+    .calc-btn.accent {
+      background: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+      border-color: hsl(var(--primary));
+      font-size: 1.2rem;
+    }
+
+    .calc-btn.accent:hover {
+      background: hsl(var(--primary));
+      opacity: .9;
+    }
+
+    .calc-btn.span2 {
+      grid-column: span 2;
+    }
+
+    .calc-hint {
+      font-size: .72rem;
+      color: hsl(var(--muted-foreground));
+      text-align: center;
+      margin-top: 12px;
+      opacity: .8;
+    }
+
     /* ---------- toast ---------- */
     .toast {
       position: fixed;
@@ -776,14 +899,25 @@
           <p>controle e calcule o que você gasta enquanto faz compras :)</p>
         </div>
       </div>
-      <button class="btn btn-icon btn-outline" id="themeBtn" title="Tema" aria-label="Alternar tema">
-        <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="4" />
-          <path
-            d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-        </svg>
-      </button>
+      <div class="header-actions">
+        <button class="btn btn-icon btn-outline" id="calcBtn" title="Calculadora" aria-label="Abrir calculadora">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="2" width="16" height="20" rx="2" />
+            <line x1="8" y1="6" x2="16" y2="6" />
+            <line x1="16" y1="14" x2="16" y2="18" />
+            <path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01" />
+          </svg>
+        </button>
+        <button class="btn btn-icon btn-outline" id="themeBtn" title="Tema" aria-label="Alternar tema">
+          <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4" />
+            <path
+              d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+          </svg>
+        </button>
+      </div>
     </header>
 
     <!-- Summary -->
@@ -935,6 +1069,35 @@
         <button class="btn btn-outline" id="budgetCancel">Cancelar</button>
         <button class="btn btn-primary" id="budgetSave">Salvar</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Calculator dialog -->
+  <div class="overlay" id="calcOverlay">
+    <div class="dialog calc-dialog" role="dialog" aria-modal="true">
+      <div class="calc-head">
+        <h3>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="2" width="16" height="20" rx="2" />
+            <line x1="8" y1="6" x2="16" y2="6" />
+            <path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01" />
+          </svg>
+          Calculadora
+        </h3>
+        <button class="icon-btn" id="calcClose" aria-label="Fechar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="calc-display">
+        <div class="calc-expr" id="calcExpr">&nbsp;</div>
+        <div class="calc-result" id="calcResult">0</div>
+      </div>
+      <div class="calc-grid" id="calcGrid"></div>
+      <p class="calc-hint">Dá pra digitar pelo teclado · Enter calcula · Esc fecha</p>
     </div>
   </div>
 
@@ -1176,6 +1339,187 @@
         closeBudget(); render(); toast("Orçamento salvo");
       }
 
+      /* ---------------- Calculator ---------------- */
+      var calc = { expr: "", history: "" };
+
+      var CALC_BTNS = [
+        { l: "C", cls: "fn", a: "clear" },
+        { l: "⌫", cls: "fn", a: "back" },
+        { l: "%", cls: "fn", a: "pct" },
+        { l: "÷", cls: "op", a: "op", v: "/" },
+        { l: "7", a: "d" }, { l: "8", a: "d" }, { l: "9", a: "d" }, { l: "×", cls: "op", a: "op", v: "*" },
+        { l: "4", a: "d" }, { l: "5", a: "d" }, { l: "6", a: "d" }, { l: "−", cls: "op", a: "op", v: "-" },
+        { l: "1", a: "d" }, { l: "2", a: "d" }, { l: "3", a: "d" }, { l: "+", cls: "op", a: "op", v: "+" },
+        { l: "0", a: "d", cls: "span2" }, { l: ".", a: "d" }, { l: "=", cls: "accent", a: "eq" }
+      ];
+
+      function buildCalc() {
+        var g = $("calcGrid");
+        CALC_BTNS.forEach(function (def) {
+          var b = document.createElement("button");
+          b.className = "calc-btn" + (def.cls ? " " + def.cls : "");
+          b.textContent = def.l;
+          b.addEventListener("click", function () { calcInput(def); });
+          g.appendChild(b);
+        });
+      }
+
+      // safe expression evaluation (no eval)
+      function calcTokenize(s) {
+        var tokens = [], i = 0, prev = null;
+        while (i < s.length) {
+          var c = s[i];
+          if (c === " ") { i++; continue; }
+          if ("+-*/".indexOf(c) >= 0) {
+            var unary = c === "-" && (prev === null || prev.t === "op");
+            if (unary) {
+              var num = "-"; i++;
+              while (i < s.length && ((s[i] >= "0" && s[i] <= "9") || s[i] === ".")) { num += s[i]; i++; }
+              if (num === "-") { var lone = { t: "op", v: "-" }; tokens.push(lone); prev = lone; continue; }
+              var neg = { t: "num", v: parseFloat(num) }; tokens.push(neg); prev = neg; continue;
+            }
+            var op = { t: "op", v: c }; tokens.push(op); prev = op; i++;
+          } else if ((c >= "0" && c <= "9") || c === ".") {
+            var n = c; i++;
+            while (i < s.length && ((s[i] >= "0" && s[i] <= "9") || s[i] === ".")) { n += s[i]; i++; }
+            var tn = { t: "num", v: parseFloat(n) }; tokens.push(tn); prev = tn;
+          } else { i++; }
+        }
+        return tokens;
+      }
+      function calcToRPN(tokens) {
+        var out = [], ops = [], prec = { "+": 1, "-": 1, "*": 2, "/": 2 };
+        tokens.forEach(function (tk) {
+          if (tk.t === "num") out.push(tk);
+          else {
+            while (ops.length && prec[ops[ops.length - 1].v] >= prec[tk.v]) out.push(ops.pop());
+            ops.push(tk);
+          }
+        });
+        while (ops.length) out.push(ops.pop());
+        return out;
+      }
+      function calcEvalRPN(rpn) {
+        var st = [];
+        rpn.forEach(function (tk) {
+          if (tk.t === "num") st.push(tk.v);
+          else {
+            var b = st.pop(), a = st.pop();
+            if (a === undefined || b === undefined) throw new Error("e");
+            var r;
+            if (tk.v === "+") r = a + b;
+            else if (tk.v === "-") r = a - b;
+            else if (tk.v === "*") r = a * b;
+            else r = a / b;
+            st.push(r);
+          }
+        });
+        if (st.length !== 1) throw new Error("e");
+        return st[0];
+      }
+      function calcCompute(expr) {
+        var t = calcTokenize(expr);
+        if (!t.length) return 0;
+        var r = calcEvalRPN(calcToRPN(t));
+        if (!isFinite(r)) throw new Error("inf");
+        return r;
+      }
+      function calcStripTail(s) { return s.replace(/[+\-*/.]+$/, ""); }
+      function calcPretty(s) {
+        return s.replace(/\+/g, " + ").replace(/-/g, " − ").replace(/\*/g, " × ")
+          .replace(/\//g, " ÷ ").replace(/\s+/g, " ").trim();
+      }
+      function calcFmt(n) {
+        if (!isFinite(n)) return "Erro";
+        var r = Math.round(n * 1e10) / 1e10;
+        return r.toLocaleString("pt-BR", { maximumFractionDigits: 10 });
+      }
+
+      function calcAppendChar(ch) {
+        if (ch === ".") {
+          var m = calc.expr.match(/(\d*\.?\d*)$/);
+          if (m && m[1].indexOf(".") >= 0) return;
+          if (!m || m[1] === "") { calc.expr += "0."; return; }
+          calc.expr += ".";
+          return;
+        }
+        calc.expr += ch;
+      }
+      function calcAppendOp(v) {
+        if (calc.expr === "") { if (v === "-") calc.expr = "-"; return; }
+        var last = calc.expr.slice(-1);
+        if ("+-*/".indexOf(last) >= 0) calc.expr = calc.expr.slice(0, -1) + v;
+        else calc.expr += v;
+      }
+      function calcPct() {
+        var m = calc.expr.match(/(\d*\.?\d+)$/);
+        if (m) {
+          var num = parseFloat(m[1]) / 100;
+          calc.expr = calc.expr.slice(0, m.index) + String(num);
+        }
+      }
+      function calcEquals() {
+        var src = calcStripTail(calc.expr);
+        if (src === "") return;
+        try {
+          var r = calcCompute(src);
+          r = Math.round(r * 1e10) / 1e10;
+          calc.history = calcPretty(src) + " =";
+          calc.expr = String(r);
+        } catch (e) {
+          calc.history = "";
+          calc.expr = "";
+          $("calcResult").textContent = "Erro";
+          $("calcExpr").innerHTML = "&nbsp;";
+          return;
+        }
+      }
+
+      function calcInput(def) {
+        if (calc.history) {
+          if (def.a === "d") calc.expr = "";
+          calc.history = "";
+        }
+        if (def.a === "clear") { calc.expr = ""; }
+        else if (def.a === "back") { calc.expr = calc.expr.slice(0, -1); }
+        else if (def.a === "d") { calcAppendChar(def.l); }
+        else if (def.a === "op") { calcAppendOp(def.v); }
+        else if (def.a === "pct") { calcPct(); }
+        else if (def.a === "eq") { calcEquals(); }
+        renderCalc();
+      }
+
+      function renderCalc() {
+        $("calcExpr").innerHTML = calc.history || calcPretty(calc.expr) || "&nbsp;";
+        var resEl = $("calcResult");
+        if (calc.expr === "") { resEl.textContent = "0"; return; }
+        try {
+          var r = calcCompute(calcStripTail(calc.expr));
+          resEl.textContent = calcFmt(r);
+        } catch (e) { resEl.textContent = "—"; }
+      }
+
+      function openCalc() {
+        $("calcOverlay").classList.add("open");
+        renderCalc();
+      }
+      function closeCalc() { $("calcOverlay").classList.remove("open"); }
+
+      function calcKey(e) {
+        if (!$("calcOverlay").classList.contains("open")) return;
+        var k = e.key;
+        if (/^[0-9]$/.test(k)) { calcInput({ a: "d", l: k }); }
+        else if (k === ".") { calcInput({ a: "d", l: "." }); }
+        else if (k === "+") { calcInput({ a: "op", v: "+" }); }
+        else if (k === "-") { calcInput({ a: "op", v: "-" }); }
+        else if (k === "*") { calcInput({ a: "op", v: "*" }); }
+        else if (k === "/") { e.preventDefault(); calcInput({ a: "op", v: "/" }); }
+        else if (k === "%") { calcInput({ a: "pct" }); }
+        else if (k === "Enter" || k === "=") { e.preventDefault(); calcInput({ a: "eq" }); }
+        else if (k === "Backspace") { e.preventDefault(); calcInput({ a: "back" }); }
+        else if (k === "Delete" || k.toLowerCase() === "c") { calcInput({ a: "clear" }); }
+      }
+
       /* ---------------- Theme ---------------- */
       function applyTheme(t) {
         document.documentElement.setAttribute("data-theme", t);
@@ -1247,7 +1591,6 @@
           doc.setTextColor(30);
         }
 
-        // Header
         doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.setTextColor(20);
         doc.text("Nota de Compra", M, y); y += 20;
         doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(130);
@@ -1258,7 +1601,6 @@
         y += 22;
         colHeader();
 
-        // Rows
         doc.setFont("helvetica", "normal"); doc.setFontSize(10.5);
         state.items.forEach(function (it) {
           if (y > H - 150) { doc.addPage(); y = M; colHeader(); doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); }
@@ -1274,7 +1616,6 @@
           y += 13; doc.setDrawColor(240); doc.line(M, y, W - M, y); y += 14;
         });
 
-        // Totals
         if (y > H - 170) { doc.addPage(); y = M; }
         y += 6; doc.setDrawColor(30); doc.setLineWidth(1); doc.line(M, y, W - M, y); y += 24;
         function totalLine(label, val, bold, color) {
@@ -1292,7 +1633,6 @@
           else totalLine("Excedente", "- " + brl(Math.abs(d.diff)), false, [220, 38, 38]);
         }
 
-        // Footer
         doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(150);
         doc.text("feito com amor por ojonatasquirino.com", W / 2, H - 36, { align: "center" });
 
@@ -1365,19 +1705,25 @@
 
       $("clearBtn").addEventListener("click", clearAll);
       $("checkoutBtn").addEventListener("click", checkout);
+
+      $("calcBtn").addEventListener("click", openCalc);
+      $("calcClose").addEventListener("click", closeCalc);
+
       $("themeBtn").addEventListener("click", function () {
         var cur = document.documentElement.getAttribute("data-theme");
         applyTheme(cur === "dark" ? "light" : "dark");
       });
 
-      // close overlay on backdrop click / Esc
-      [["overlay", closeItem], ["budgetOverlay", closeBudget]].forEach(function (pair) {
+      // close overlays on backdrop click / Esc
+      [["overlay", closeItem], ["budgetOverlay", closeBudget], ["calcOverlay", closeCalc]].forEach(function (pair) {
         $(pair[0]).addEventListener("click", function (e) { if (e.target === this) pair[1](); });
       });
       document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") { closeItem(); closeBudget(); }
+        if (e.key === "Escape") { closeItem(); closeBudget(); closeCalc(); }
+        calcKey(e);
       });
 
+      buildCalc();
       initTheme();
       render();
     })();
