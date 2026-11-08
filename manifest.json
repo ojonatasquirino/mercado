@@ -1,0 +1,14 @@
+{
+  "name": "Mercado App",
+  "short_name": "Mercado",
+  "description": "Controle e calcule o que você gasta enquanto faz compras.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#18181b",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

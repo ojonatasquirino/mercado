@@ -4,8 +4,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MercadoAPP</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <title>Mercado App</title>
+  <meta name="description" content="Controle e calcule o que você gasta enquanto faz compras no mercado. Funciona offline." />
+  <meta name="theme-color" content="#18181b" />
+  <meta property="og:title" content="Mercado App" />
+  <meta property="og:description" content="Lista de mercado com orçamento, calculadora e nota em PDF. Funciona offline." />
+  <meta property="og:type" content="website" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <style>
     /* ---------- shadcn-style design tokens ---------- */
     :root {
@@ -520,6 +528,35 @@
       background: hsl(var(--destructive) / .1);
     }
 
+    .price-inline {
+      width: 92px;
+      height: 32px;
+      font-size: .85rem;
+      text-align: right;
+      padding: 0 8px 0 26px;
+    }
+
+    .price-inline-wrap span {
+      left: 8px;
+      font-size: .75rem;
+    }
+
+    .toast button {
+      background: transparent;
+      border: none;
+      color: inherit;
+      font: inherit;
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+      padding: 0 2px;
+    }
+
+    .toast.show {
+      pointer-events: auto;
+    }
+
     /* ---------- empty ---------- */
     .empty {
       text-align: center;
@@ -940,7 +977,7 @@
             <rect x="2" y="5" width="20" height="14" rx="2" />
             <path d="M2 10h20" />
           </svg>
-          Total da lista
+          No carrinho
         </div>
         <div class="value" id="spentVal">R$ 0,00</div>
         <div class="sub" id="spentSub">0 itens</div>
@@ -1039,12 +1076,12 @@
       <div class="row2">
         <div class="field">
           <label for="fQty">Quantidade</label>
-          <input class="input" id="fQty" type="number" min="0" step="1" inputmode="decimal" value="1" />
+          <input class="input" id="fQty" type="text" inputmode="decimal" value="1" autocomplete="off" />
         </div>
         <div class="field">
           <label for="fPrice">Preço unitário</label>
-          <div class="input-prefix"><span>R$</span><input class="input" id="fPrice" type="number" min="0" step="0.01"
-              inputmode="decimal" placeholder="0,00" /></div>
+          <div class="input-prefix"><span>R$</span><input class="input" id="fPrice" type="text"
+              inputmode="decimal" placeholder="0,00" autocomplete="off" /></div>
         </div>
       </div>
       <div class="preview-line"><span>Subtotal</span><b id="dlgPreview">R$ 0,00</b></div>
@@ -1062,8 +1099,8 @@
       <p class="desc">Quanto você pretende gastar neste mercado?</p>
       <div class="field">
         <label for="fBudget">Valor estabelecido</label>
-        <div class="input-prefix"><span>R$</span><input class="input" id="fBudget" type="number" min="0" step="0.01"
-            inputmode="decimal" placeholder="0,00" /></div>
+        <div class="input-prefix"><span>R$</span><input class="input" id="fBudget" type="text"
+            inputmode="decimal" placeholder="0,00" autocomplete="off" /></div>
       </div>
       <div class="dialog-actions">
         <button class="btn btn-outline" id="budgetCancel">Cancelar</button>
@@ -1156,15 +1193,30 @@
       }
       function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
       function total() { return state.items.reduce(function (s, i) { return s + i.qty * i.price; }, 0); }
+      function cartTotal() { return state.items.reduce(function (s, i) { return s + (i.checked ? i.qty * i.price : 0); }, 0); }
+      // aceita "4,99", "4.99", "1.234,56"
+      function num(v) {
+        var s = String(v == null ? "" : v).trim().replace(/\s|R\$/g, "");
+        if (!s) return NaN;
+        if (s.indexOf(",") >= 0) s = s.replace(/\./g, "").replace(",", ".");
+        return parseFloat(s);
+      }
+      function fmtNum(n) { return n ? String(n).replace(".", ",") : ""; }
       function $(id) { return document.getElementById(id); }
 
       var toastTimer;
-      function toast(msg) {
+      function toast(msg, actionLabel, action) {
         var t = $("toast");
         t.textContent = msg;
+        if (actionLabel) {
+          var b = document.createElement("button");
+          b.textContent = actionLabel;
+          b.addEventListener("click", function () { t.classList.remove("show"); action(); });
+          t.appendChild(b);
+        }
         t.classList.add("show");
         clearTimeout(toastTimer);
-        toastTimer = setTimeout(function () { t.classList.remove("show"); }, 2200);
+        toastTimer = setTimeout(function () { t.classList.remove("show"); }, actionLabel ? 5000 : 2200);
       }
 
       /* ---------------- Render ---------------- */
@@ -1186,7 +1238,9 @@
         // items
         var wrap = $("items");
         wrap.innerHTML = "";
-        state.items.forEach(function (it) {
+        var ordered = state.items.filter(function (i) { return !i.checked; })
+          .concat(state.items.filter(function (i) { return i.checked; }));
+        ordered.forEach(function (it) {
           var row = document.createElement("div");
           row.className = "item" + (it.checked ? " done" : "");
           row.innerHTML =
@@ -1197,7 +1251,9 @@
             '<div class="item-name"></div>' +
             '<div class="item-meta">' + it.qty + " × " + brl(it.price) + '</div>' +
             '</div>' +
-            '<div class="item-total">' + brl(it.qty * it.price) + '</div>' +
+            (it.price > 0 || it.checked
+              ? '<div class="item-total">' + brl(it.qty * it.price) + '</div>'
+              : '<div class="input-prefix price-inline-wrap"><span>R$</span><input class="input price-inline" type="text" inputmode="decimal" placeholder="0,00" aria-label="Preço de ' + esc(it.name) + '" /></div>') +
             '<div class="item-actions">' +
             '<button class="icon-btn edit" aria-label="Editar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>' +
             '<button class="icon-btn del" aria-label="Excluir"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>' +
@@ -1206,6 +1262,15 @@
           row.querySelector(".check").addEventListener("click", function () { toggle(it.id); });
           row.querySelector(".edit").addEventListener("click", function () { openItem(it.id); });
           row.querySelector(".del").addEventListener("click", function () { remove(it.id); });
+          var pi = row.querySelector(".price-inline");
+          if (pi) {
+            var commit = function () {
+              var v = num(pi.value);
+              if (v > 0) { it.price = v; it.checked = true; render(); toast(it.name + " no carrinho"); }
+            };
+            pi.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); commit(); } });
+            pi.addEventListener("change", commit);
+          }
           wrap.appendChild(row);
         });
 
@@ -1216,12 +1281,12 @@
         $("itemBadge").textContent = state.items.length;
 
         // summary
-        var t = total();
+        var planned = total();
+        var t = cartTotal();
         var checked = state.items.filter(function (i) { return i.checked; }).length;
         $("budgetVal").textContent = brl(state.budget);
         $("spentVal").textContent = brl(t);
-        $("spentSub").textContent = state.items.length + (state.items.length === 1 ? " item" : " itens") +
-          (checked ? " · " + checked + " pego" + (checked > 1 ? "s" : "") : "");
+        $("spentSub").textContent = checked + " de " + state.items.length + " · planejado " + brl(planned);
 
         // balance
         var diff = state.budget - t;
@@ -1251,7 +1316,7 @@
           var bar = $("bar");
           bar.style.width = pct + "%";
           bar.className = "bar" + (t > state.budget ? " over" : pct >= 85 ? " warn" : "");
-          $("progLeft").textContent = brl(t) + " de " + brl(state.budget);
+          $("progLeft").textContent = "No carrinho: " + brl(t) + " de " + brl(state.budget);
           $("progRight").textContent = Math.round((t / state.budget) * 100) + "% do orçamento";
         } else {
           pcard.style.display = "none";
@@ -1262,25 +1327,35 @@
 
       /* ---------------- Actions ---------------- */
       function addPreset(name) {
-        var batch = PRESETS[name].map(function (p) {
-          return { id: uid(), name: p[0], qty: p[1], price: p[2], checked: false };
-        });
+        var have = {};
+        state.items.forEach(function (i) { have[i.name.trim().toLowerCase()] = 1; });
+        var batch = PRESETS[name].filter(function (p) { return !have[p[0].toLowerCase()]; })
+          .map(function (p) { return { id: uid(), name: p[0], qty: p[1], price: p[2], checked: false }; });
+        if (!batch.length) { toast("Todos os itens já estão na lista"); return; }
         state.items = batch.concat(state.items);
         render();
-        toast('"' + name + '" adicionada');
+        var skipped = PRESETS[name].length - batch.length;
+        toast(batch.length + " itens adicionados" + (skipped ? " · " + skipped + " já estavam" : ""));
       }
       function toggle(id) {
         var it = find(id); if (it) { it.checked = !it.checked; render(); }
       }
       function remove(id) {
-        state.items = state.items.filter(function (i) { return i.id !== id; });
+        var idx = state.items.findIndex(function (i) { return i.id === id; });
+        if (idx < 0) return;
+        var removed = state.items.splice(idx, 1)[0];
         render();
+        toast('"' + removed.name + '" removido', "Desfazer", function () {
+          state.items.splice(idx, 0, removed); render();
+        });
       }
       function find(id) { return state.items.find(function (i) { return i.id === id; }); }
 
       function clearAll() {
         if (!state.items.length) return;
-        if (confirm("Limpar todos os itens da lista?")) { state.items = []; render(); toast("Lista limpa"); }
+        var backup = state.items;
+        state.items = []; render();
+        toast("Lista limpa", "Desfazer", function () { state.items = backup; render(); });
       }
 
       /* ---------------- Item dialog ---------------- */
@@ -1292,8 +1367,8 @@
         $("dlgDesc").textContent = it ? "Atualize a quantidade ou o preço." : "Informe o nome, a quantidade e o preço unitário.";
         $("saveBtn").textContent = it ? "Salvar" : "Adicionar";
         $("fName").value = it ? it.name : "";
-        $("fQty").value = it ? it.qty : 1;
-        $("fPrice").value = it ? it.price : "";
+        $("fQty").value = it ? fmtNum(it.qty) : "1";
+        $("fPrice").value = it ? fmtNum(it.price) : "";
         updatePreview();
         $("overlay").classList.add("open");
         setTimeout(function () { $("fName").focus(); }, 40);
@@ -1301,25 +1376,25 @@
       function closeItem() { $("overlay").classList.remove("open"); editingId = null; }
 
       function updatePreview() {
-        var q = parseFloat($("fQty").value) || 0;
-        var p = parseFloat($("fPrice").value) || 0;
+        var q = num($("fQty").value) || 0;
+        var p = num($("fPrice").value) || 0;
         $("dlgPreview").textContent = brl(q * p);
       }
 
       function saveItem() {
         var name = $("fName").value.trim();
-        var qty = parseFloat($("fQty").value);
-        var price = parseFloat($("fPrice").value);
+        var qty = num($("fQty").value);
+        var price = num($("fPrice").value);
         if (!name) { $("fName").focus(); toast("Dê um nome ao item"); return; }
         if (!qty || qty <= 0) qty = 1;
         if (!price || price < 0) price = 0;
 
         if (editingId) {
           var it = find(editingId);
-          if (it) { it.name = name; it.qty = qty; it.price = price; }
+          if (it) { it.name = name; it.qty = qty; it.price = price; if (price > 0) it.checked = true; }
           toast("Item atualizado");
         } else {
-          state.items.unshift({ id: uid(), name: name, qty: qty, price: price, checked: false });
+          state.items.unshift({ id: uid(), name: name, qty: qty, price: price, checked: price > 0 });
           toast("Item adicionado");
         }
         closeItem();
@@ -1328,13 +1403,13 @@
 
       /* ---------------- Budget dialog ---------------- */
       function openBudget() {
-        $("fBudget").value = state.budget > 0 ? state.budget : "";
+        $("fBudget").value = state.budget > 0 ? fmtNum(state.budget) : "";
         $("budgetOverlay").classList.add("open");
         setTimeout(function () { $("fBudget").focus(); }, 40);
       }
       function closeBudget() { $("budgetOverlay").classList.remove("open"); }
       function saveBudget() {
-        var v = parseFloat($("fBudget").value);
+        var v = num($("fBudget").value);
         state.budget = (!v || v < 0) ? 0 : v;
         closeBudget(); render(); toast("Orçamento salvo");
       }
@@ -1719,13 +1794,21 @@
         $(pair[0]).addEventListener("click", function (e) { if (e.target === this) pair[1](); });
       });
       document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") { closeItem(); closeBudget(); closeCalc(); }
+        if (e.key === "Escape") {
+          if ($("calcOverlay").classList.contains("open")) closeCalc();
+          else if ($("budgetOverlay").classList.contains("open")) closeBudget();
+          else closeItem();
+        }
         calcKey(e);
       });
 
       buildCalc();
       initTheme();
       render();
+
+      if ("serviceWorker" in navigator && location.protocol !== "file:") {
+        window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () { }); });
+      }
     })();
   </script>
 </body>
