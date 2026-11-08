@@ -528,8 +528,13 @@
       background: hsl(var(--destructive) / .1);
     }
 
+    .price-inline-wrap {
+      flex: none;
+      width: 104px;
+    }
+
     .price-inline {
-      width: 92px;
+      width: 100%;
       height: 32px;
       font-size: .85rem;
       text-align: right;
@@ -822,7 +827,7 @@
     .toast {
       position: fixed;
       left: 50%;
-      bottom: 24px;
+      bottom: calc(88px + env(safe-area-inset-bottom));
       transform: translateX(-50%) translateY(20px);
       background: hsl(var(--primary));
       color: hsl(var(--primary-foreground));
@@ -914,6 +919,29 @@
 
       .brand p {
         display: none;
+      }
+
+      .item {
+        gap: 10px;
+        padding: 11px 10px 11px 12px;
+      }
+
+      .item-name {
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+
+      .icon-btn {
+        width: 30px;
+      }
+    }
+
+    /* iOS: evita zoom automático ao focar inputs */
+    @media (max-width: 540px) {
+      .input {
+        font-size: 16px;
       }
     }
   </style>
