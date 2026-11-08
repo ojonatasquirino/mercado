@@ -1,5 +1,5 @@
 // Mercado App - service worker (offline-first)
-var CACHE = "mercado-v3";
+var CACHE = "mercado-v4";
 var ASSETS = ["./", "index.html", "manifest.json", "icon.svg",
   "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"];
 
