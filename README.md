@@ -36,7 +36,8 @@ Sem isso o app funciona normalmente, só que salvo no próprio aparelho.
 1. Acesse https://console.firebase.google.com e clique em **Criar projeto** (Google Analytics pode ficar desativado).
 2. Em **Build > Authentication > Get started**, ative os provedores **Google** e **E-mail/senha**.
 3. Em **Build > Firestore Database > Criar banco de dados**, escolha a região `southamerica-east1 (São Paulo)` e o **modo de produção**.
-4. Na aba **Regras** do Firestore, cole o conteúdo de `firestore.rules` e publique.
+4. Na aba **Regras** do Firestore, adicione o bloco `match /mercado/...` de `firestore.rules` (se o projeto já tiver outras regras, só acrescente o bloco, sem apagar as existentes) e publique.
+   Os dados do app ficam em `mercado/{uid}`, separados de outros apps do mesmo projeto.
 5. Em **Authentication > Settings > Domínios autorizados**, adicione `ojonatasquirino.github.io`.
 6. Em **Configurações do projeto > Seus apps**, clique no ícone **Web (`</>`)**, registre o app e copie o objeto `firebaseConfig`.
 7. Cole em `firebase-config.js` no lugar de `null` e faça o commit.
