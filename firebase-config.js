@@ -1,17 +1,12 @@
 /*
- * Cole aqui a configuração do seu projeto Firebase
- * (Console do Firebase > Configurações do projeto > Seus apps > Web > Configuração).
- * Enquanto ficar null, o app funciona só no aparelho, sem login.
+ * Configuração do projeto Firebase próprio do Mercado App (mercado-app-228fe).
+ * Esta configuração web não é segredo: quem protege os dados são as regras do Firestore.
  */
-window.FIREBASE_CONFIG = null;
-
-/* Exemplo:
 window.FIREBASE_CONFIG = {
-  apiKey: "AIza...",
-  authDomain: "mercado-app-xxxx.firebaseapp.com",
-  projectId: "mercado-app-xxxx",
-  storageBucket: "mercado-app-xxxx.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:xxxxxxxx"
+  apiKey: "AIzaSyBn37F_LC3QTKNF1xZcv6L0aP9cN5IAae0",
+  authDomain: "mercado-app-228fe.firebaseapp.com",
+  projectId: "mercado-app-228fe",
+  storageBucket: "mercado-app-228fe.firebasestorage.app",
+  messagingSenderId: "363167083791",
+  appId: "1:363167083791:web:6db8f73d61e7b164b0227a"
 };
-*/

@@ -29,17 +29,12 @@ Lista de mercado offline com orçamento, preço no carrinho em tempo real, ditad
 | `firestore.rules` | Regras de segurança do banco |
 | `sw.js` / `manifest.json` | PWA offline |
 
-## Ativar login e sincronização (Firebase)
+## Login e sincronização (Firebase)
 
-Sem isso o app funciona normalmente, só que salvo no próprio aparelho.
+O app usa o projeto Firebase próprio `mercado-app-228fe`:
 
-1. Acesse https://console.firebase.google.com e clique em **Criar projeto** (Google Analytics pode ficar desativado).
-2. Em **Build > Authentication > Get started**, ative os provedores **Google** e **E-mail/senha**.
-3. Em **Build > Firestore Database > Criar banco de dados**, escolha a região `southamerica-east1 (São Paulo)` e o **modo de produção**.
-4. Na aba **Regras** do Firestore, adicione o bloco `match /mercado/...` de `firestore.rules` (se o projeto já tiver outras regras, só acrescente o bloco, sem apagar as existentes) e publique.
-   Os dados do app ficam em `mercado/{uid}`, separados de outros apps do mesmo projeto.
-5. Em **Authentication > Settings > Domínios autorizados**, adicione `ojonatasquirino.github.io`.
-6. Em **Configurações do projeto > Seus apps**, clique no ícone **Web (`</>`)**, registre o app e copie o objeto `firebaseConfig`.
-7. Cole em `firebase-config.js` no lugar de `null` e faça o commit.
+- **Authentication:** Google e E-mail/senha, domínio `ojonatasquirino.github.io` autorizado
+- **Firestore:** região `southamerica-east1` (São Paulo), dados em `users/{uid}/estado/lista` e `users/{uid}/compras/{id}`
+- **Regras:** as de `firestore.rules` (cada pessoa só acessa os próprios dados)
 
-A configuração web do Firebase não é segredo: quem protege os dados são as regras do passo 4.
+A configuração em `firebase-config.js` não é segredo: quem protege os dados são as regras.

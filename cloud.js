@@ -4,8 +4,8 @@
  * Sem login, o app segue 100% local como antes.
  *
  * Estrutura no Firestore:
- *   mercado/{uid}/estado/lista     -> { budget, items, updatedAt }
- *   mercado/{uid}/compras/{id}     -> { date, market, total, items }
+ *   users/{uid}/estado/lista     -> { budget, items, updatedAt }
+ *   users/{uid}/compras/{id}     -> { date, market, total, items }
  */
 (function (global) {
   "use strict";
@@ -91,7 +91,7 @@
   function errorText(e) { return ERR[(e && (e.code || e.message)) || ""] || "Não deu certo. Tente de novo"; }
 
   /* ---------- sincronização ---------- */
-  function userRef() { return db.collection("mercado").doc(user.uid); }
+  function userRef() { return db.collection("users").doc(user.uid); }
   function listRef() { return userRef().collection("estado").doc("lista"); }
   function comprasRef() { return userRef().collection("compras"); }
 

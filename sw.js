@@ -1,5 +1,5 @@
 // Mercado App - service worker (offline-first)
-var CACHE = "mercado-v8";
+var CACHE = "mercado-v9";
 var ASSETS = ["./", "index.html", "styles.css", "firebase-config.js", "store.js", "cloud.js", "voice.js", "app.js",
   "manifest.json", "icon.svg", "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"];
 var SDK = "https://www.gstatic.com/firebasejs/";
