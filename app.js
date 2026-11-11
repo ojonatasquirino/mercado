@@ -943,6 +943,77 @@
   function openHist() { renderHist(); $("histOverlay").classList.add("open"); }
   function closeHist() { $("histOverlay").classList.remove("open"); }
 
+  /* ---------------- Conta e nuvem ---------------- */
+  function initials(u) {
+    var n = (u.displayName || u.email || "?").trim();
+    var p = n.split(/[\s@.]+/).filter(Boolean);
+    return ((p[0] || "?")[0] + (p.length > 1 && u.displayName ? p[1][0] : "")).toUpperCase();
+  }
+  function paintAvatar(el, u) {
+    el.textContent = u.photoURL ? "" : initials(u);
+    el.style.backgroundImage = u.photoURL ? "url('" + u.photoURL.replace(/'/g, "%27") + "')" : "";
+  }
+  function renderAccount(u) {
+    $("accountIcon").style.display = u ? "none" : "";
+    $("accountAvatar").style.display = u ? "" : "none";
+    $("syncDot").style.display = u ? "" : "none";
+    $("accOut").style.display = u ? "none" : "";
+    $("accIn").style.display = u ? "" : "none";
+    $("accTitle").textContent = u ? "Sua conta" : "Entrar";
+    if (u) {
+      paintAvatar($("accountAvatar"), u);
+      paintAvatar($("accAvatarLg"), u);
+      $("accName").textContent = u.displayName || "Minha conta";
+      $("accEmail").textContent = u.email || "";
+    }
+  }
+  function accMsg(t, ok) { var e = $("accError"); e.textContent = t || ""; e.className = "acc-error" + (ok ? " ok" : ""); }
+  function busy(on) { ["googleBtn", "signInBtn", "signUpBtn"].forEach(function (id) { $(id).disabled = on; }); }
+  function runAuth(promise, okMsg) {
+    accMsg(""); busy(true);
+    promise.then(function () {
+      busy(false);
+      if (okMsg) { accMsg(okMsg, true); return; }
+      closeAccount(); toast("Conectado. Sua lista agora sincroniza na nuvem");
+    }).catch(function (e) { busy(false); accMsg(Cloud.errorText(e)); });
+  }
+  function emailVals() {
+    var email = $("fEmail").value.trim(), pass = $("fPass").value;
+    if (!email) { accMsg("Informe o e-mail"); $("fEmail").focus(); return null; }
+    return { email: email, pass: pass };
+  }
+  function openAccount() { accMsg(""); $("accountOverlay").classList.add("open"); }
+  function closeAccount() { $("accountOverlay").classList.remove("open"); }
+
+  if (Cloud.enabled()) {
+    $("accountBtn").style.display = "";
+    Cloud.onUser(renderAccount);
+    Cloud.onStatus(function (st) {
+      $("syncDot").className = "sync-dot" + (st === "sincronizando" ? " busy" : st === "erro" ? " err" : "");
+      $("accSync").textContent = st === "erro" ? "com erro, tentando de novo" : st === "sincronizando" ? "sincronizando…" : "ativa";
+    });
+    Store.onRemoteChange(function () {
+      state = Store.getList();
+      hist = Store.getHistory();
+      render();
+      if ($("histOverlay").classList.contains("open")) renderHist();
+    });
+    Cloud.init().catch(function () { });   // restaura a sessão salva
+  }
+  $("accountBtn").addEventListener("click", openAccount);
+  $("accClose").addEventListener("click", closeAccount);
+  $("googleBtn").addEventListener("click", function () { runAuth(Cloud.google()); });
+  $("signInBtn").addEventListener("click", function () { var v = emailVals(); if (v) runAuth(Cloud.emailSignIn(v.email, v.pass)); });
+  $("signUpBtn").addEventListener("click", function () { var v = emailVals(); if (v) runAuth(Cloud.emailSignUp(v.email, v.pass)); });
+  $("fPass").addEventListener("keydown", function (e) { if (e.key === "Enter") $("signInBtn").click(); });
+  $("forgotBtn").addEventListener("click", function () {
+    var v = emailVals(); if (!v) return;
+    runAuth(Cloud.resetPassword(v.email), "Enviamos um link para redefinir a senha no seu e-mail");
+  });
+  $("signOutBtn").addEventListener("click", function () {
+    Cloud.signOut().then(function () { closeAccount(); toast("Você saiu. A lista continua salva neste aparelho"); });
+  });
+
   /* ---------------- Events ---------------- */
   $("addBtn").addEventListener("click", function () { openItem(null); });
   $("cancelBtn").addEventListener("click", closeItem);
@@ -981,12 +1052,13 @@
   });
 
   // close overlays on backdrop click / Esc
-  [["overlay", closeItem], ["budgetOverlay", closeBudget], ["calcOverlay", closeCalc], ["checkoutOverlay", closeCheckout], ["histOverlay", closeHist], ["voiceOverlay", cancelVoice]].forEach(function (pair) {
+  [["overlay", closeItem], ["budgetOverlay", closeBudget], ["calcOverlay", closeCalc], ["checkoutOverlay", closeCheckout], ["histOverlay", closeHist], ["voiceOverlay", cancelVoice], ["accountOverlay", closeAccount]].forEach(function (pair) {
     $(pair[0]).addEventListener("click", function (e) { if (e.target === this) pair[1](); });
   });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
       if ($("voiceOverlay").classList.contains("open")) cancelVoice();
+      else if ($("accountOverlay").classList.contains("open")) closeAccount();
       else if ($("calcOverlay").classList.contains("open")) closeCalc();
       else if ($("checkoutOverlay").classList.contains("open")) closeCheckout();
       else if ($("histOverlay").classList.contains("open")) closeHist();

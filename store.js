@@ -42,16 +42,43 @@
   /* ---------- lista atual ---------- */
   function getList() {
     var l = backend.get(KEYS.list, null) || {};
-    return { budget: Number(l.budget) || 0, items: Array.isArray(l.items) ? l.items : [] };
+    return {
+      budget: Number(l.budget) || 0,
+      items: Array.isArray(l.items) ? l.items : [],
+      updatedAt: Number(l.updatedAt) || 0
+    };
   }
-  function setList(list) { backend.set(KEYS.list, list); }
+  function setList(list) {
+    var json = JSON.stringify(stripMeta(list));
+    if (json === lastListJson) return;          // nada mudou: não regrava nem sobe pra nuvem
+    lastListJson = json;
+    list.updatedAt = Date.now();
+    backend.set(KEYS.list, list);
+    if (remote) remote.pushList(list);
+  }
 
   /* ---------- histórico de compras ---------- */
   function getHistory() {
     var h = backend.get(KEYS.history, []);
     return Array.isArray(h) ? h : [];
   }
-  function setHistory(h) { backend.set(KEYS.history, h); }
+  function setHistory(h) {
+    backend.set(KEYS.history, h);
+    if (remote) remote.pushHistory(h);
+  }
+
+  /* ---------- nuvem (cloud.js pluga aqui quando há login) ---------- */
+  var remote = null, lastListJson = null, listeners = [];
+  function attachRemote(r) { remote = r; }
+  function detachRemote() { remote = null; }
+  // chamado pelo cloud.js quando chegam dados de outro aparelho
+  function applyRemote(list, history) {
+    if (list) { backend.set(KEYS.list, list); lastListJson = JSON.stringify(stripMeta(list)); }
+    if (history) backend.set(KEYS.history, history);
+    listeners.forEach(function (fn) { fn(); });
+  }
+  function stripMeta(l) { return { budget: l.budget, items: l.items }; }
+  function onRemoteChange(fn) { listeners.push(fn); }
 
   // última vez que o item foi comprado com preço: { price, market, date } ou null
   function lastPurchase(name, history) {
@@ -75,6 +102,10 @@
     getHistory: getHistory,
     setHistory: setHistory,
     lastPurchase: lastPurchase,
+    attachRemote: attachRemote,
+    detachRemote: detachRemote,
+    applyRemote: applyRemote,
+    onRemoteChange: onRemoteChange,
     getTheme: getTheme,
     setTheme: setTheme
   };

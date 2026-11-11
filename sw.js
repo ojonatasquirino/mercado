@@ -1,7 +1,8 @@
 // Mercado App - service worker (offline-first)
-var CACHE = "mercado-v6";
-var ASSETS = ["./", "index.html", "styles.css", "store.js", "voice.js", "app.js", "manifest.json", "icon.svg",
-  "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"];
+var CACHE = "mercado-v7";
+var ASSETS = ["./", "index.html", "styles.css", "firebase-config.js", "store.js", "cloud.js", "voice.js", "app.js",
+  "manifest.json", "icon.svg", "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"];
+var SDK = "https://www.gstatic.com/firebasejs/";
 
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) {
@@ -17,15 +18,22 @@ self.addEventListener("activate", function (e) {
   self.clients.claim();
 });
 
+function cacheable(url) {
+  return url.indexOf(self.location.origin) === 0 ||
+    url.indexOf("https://cdnjs.cloudflare.com/ajax/libs/jspdf/") === 0 ||
+    url.indexOf(SDK) === 0;
+}
+
 self.addEventListener("fetch", function (e) {
-  if (e.request.method !== "GET") return;
+  if (e.request.method !== "GET" || !cacheable(e.request.url)) return;   // Firestore/Auth vão direto pra rede
   e.respondWith(
     fetch(e.request).then(function (res) {
-      var copy = res.clone();
-      caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
+      if (res.ok) { var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put(e.request, copy); }); }
       return res;
     }).catch(function () {
-      return caches.match(e.request).then(function (r) { return r || caches.match("index.html"); });
+      return caches.match(e.request).then(function (r) {
+        return r || (e.request.mode === "navigate" ? caches.match("index.html") : undefined);
+      });
     })
   );
 });

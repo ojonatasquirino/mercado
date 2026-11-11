@@ -1320,3 +1320,112 @@ header.app {
     flex: 1;
   }
 }
+
+/* ---------- fase 5/6: conta ---------- */
+.account-btn {
+  position: relative;
+}
+
+.avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  display: grid;
+  place-items: center;
+  font-size: .78rem;
+  font-weight: 700;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+.avatar.lg {
+  width: 46px;
+  height: 46px;
+  font-size: 1.1rem;
+  flex: none;
+}
+
+.sync-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: hsl(var(--success));
+  border: 2px solid hsl(var(--background));
+}
+
+.sync-dot.busy {
+  background: hsl(38 92% 50%);
+}
+
+.sync-dot.err {
+  background: hsl(var(--destructive));
+}
+
+.google-btn {
+  height: 44px;
+  gap: 10px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 14px;
+  font-size: .75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: hsl(var(--border));
+}
+
+.acc-error {
+  font-size: .8rem;
+  color: hsl(var(--destructive));
+  min-height: 1.1em;
+  margin: -4px 0 10px;
+}
+
+.acc-error.ok {
+  color: hsl(var(--success));
+}
+
+.forgot {
+  display: block;
+  margin: 14px auto 0;
+  font-size: .8rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.acc-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 16px;
+}
+
+.acc-user b {
+  display: block;
+  font-size: .95rem;
+}
+
+.acc-user span {
+  font-size: .8rem;
+  color: hsl(var(--muted-foreground));
+  word-break: break-all;
+}
+
+.btn[disabled] {
+  opacity: .55;
+  pointer-events: none;
+}
