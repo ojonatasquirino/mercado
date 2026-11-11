@@ -1224,3 +1224,99 @@ header.app {
 .progress-top {
   gap: 10px;
 }
+
+/* ---------- fase 2: voz ---------- */
+.fab-bar .inner {
+  display: flex;
+  gap: 10px;
+}
+
+.mic-btn {
+  width: 52px;
+  height: 46px;
+  flex: none;
+  padding: 0;
+  border-radius: calc(var(--radius) - 2px);
+}
+
+.voice-dialog {
+  max-width: 360px;
+  text-align: center;
+  padding: 28px 22px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.voice-orb {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: none;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  margin-bottom: 6px;
+  animation: pulse 1.4s ease-out infinite;
+}
+
+.voice-orb.idle {
+  animation: none;
+  opacity: .6;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 hsl(var(--primary) / .35); }
+  100% { box-shadow: 0 0 0 22px hsl(var(--primary) / 0); }
+}
+
+.voice-status {
+  font-size: .78rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: hsl(var(--muted-foreground));
+}
+
+.voice-text {
+  font-size: 1.15rem;
+  font-weight: 600;
+  min-height: 1.6em;
+  line-height: 1.35;
+}
+
+.voice-hint {
+  font-size: .76rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 6px;
+}
+
+.heard {
+  font-size: .82rem;
+  color: hsl(var(--muted-foreground));
+  background: hsl(var(--muted));
+  border-radius: calc(var(--radius) - 2px);
+  padding: 8px 11px;
+  margin: -8px 0 14px;
+  font-style: italic;
+}
+
+.dialog-actions {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 540px) {
+  #againBtn {
+    order: 3;
+    width: 100%;
+    margin-right: 0 !important;
+    border: 1px dashed hsl(var(--border));
+  }
+
+  #againBtn ~ .btn {
+    flex: 1;
+  }
+}

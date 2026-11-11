@@ -60,6 +60,7 @@
     if (s.indexOf(",") >= 0) s = s.replace(/\./g, "").replace(",", ".");
     return parseFloat(s);
   }
+  function fmtMoney(n) { return n ? Number(n).toFixed(2).replace(".", ",") : ""; }
   function fmtNum(n) { return n ? String(n).replace(".", ",") : ""; }
   function $(id) { return document.getElementById(id); }
 
@@ -276,20 +277,70 @@
 
   /* ---------------- Item dialog ---------------- */
   var editingId = null;
-  function openItem(id) {
+  function openItem(id, voice) {
     editingId = id || null;
+    $("dlgHeard").style.display = voice ? "" : "none";
+    $("againBtn").style.display = voice ? "" : "none";
     var it = id ? find(id) : null;
     $("dlgTitle").textContent = it ? "Editar item" : "Adicionar item";
     $("dlgDesc").textContent = it ? "Atualize a quantidade ou o preço." : "Informe o nome, a quantidade e o preço unitário.";
     $("saveBtn").textContent = it ? "Salvar" : "Adicionar";
     $("fName").value = it ? it.name : "";
     $("fQty").value = it ? fmtNum(it.qty) : "1";
-    $("fPrice").value = it ? fmtNum(it.price) : "";
+    $("fPrice").value = it ? fmtMoney(it.price) : "";
+    if (voice) {
+      var ex = voice.name ? findByName(voice.name) : null;
+      $("dlgTitle").textContent = "Confirmar item";
+      $("dlgDesc").textContent = ex ? "Já está na lista: vou atualizar o preço." : "Confira e ajuste se precisar.";
+      $("dlgHeard").textContent = "“" + voice.text + "”";
+      $("saveBtn").textContent = ex ? "Atualizar" : "Adicionar";
+      $("fName").value = ex ? ex.name : voice.name;
+      $("fQty").value = fmtNum(voice.qty !== 1 || !ex ? voice.qty : ex.qty);
+      $("fPrice").value = fmtMoney(voice.price);
+    }
     updatePreview();
     $("overlay").classList.add("open");
+    if (voice) {
+      setTimeout(function () { (voice.name ? (voice.price ? $("saveBtn") : $("fPrice")) : $("fName")).focus(); }, 40);
+      return;
+    }
     setTimeout(function () { $("fName").focus(); }, 40);
   }
   function closeItem() { $("overlay").classList.remove("open"); editingId = null; }
+
+  /* ---------------- Voz ---------------- */
+  var VOICE_ERRORS = {
+    "not-allowed": "Permita o microfone nas configurações do navegador",
+    "service-not-allowed": "Permita o microfone nas configurações do navegador",
+    "network": "O ditado precisa de internet. Digite o item por enquanto",
+    "audio-capture": "Nenhum microfone encontrado",
+    "no-speech": "Não ouvi nada. Tente de novo",
+    "unsupported": "Seu navegador não tem ditado por voz",
+    "start": "Não consegui abrir o microfone"
+  };
+  var voiceErr = null;
+  function startVoice() {
+    closeItem();
+    voiceErr = null;
+    $("voiceText").textContent = "Fale o item, a quantidade e o preço";
+    $("voiceStatus").textContent = "Ouvindo…";
+    $("voiceOrb").classList.remove("idle");
+    $("voiceOverlay").classList.add("open");
+    Voice.listen({
+      onPartial: function (txt) { $("voiceText").textContent = txt; },
+      onError: function (code) { if (voiceErr !== "aborted") voiceErr = code; },
+      onEnd: function (text) {
+        var wasCancelled = voiceErr === "aborted";
+        $("voiceOverlay").classList.remove("open");
+        if (wasCancelled) return;
+        if (!text) { toast(VOICE_ERRORS[voiceErr || "no-speech"] || "Não entendi. Tente de novo"); return; }
+        var r = Voice.parse(text);
+        r.text = text;
+        openItem(null, r);
+      }
+    });
+  }
+  function cancelVoice() { voiceErr = "aborted"; Voice.stop(); $("voiceOverlay").classList.remove("open"); }
 
   function updatePreview() {
     var q = num($("fQty").value) || 0;
@@ -907,6 +958,11 @@
   $("fBudget").addEventListener("keydown", function (e) { if (e.key === "Enter") saveBudget(); });
 
   $("clearBtn").addEventListener("click", clearAll);
+  if (Voice.supported()) $("micBtn").style.display = "";
+  $("micBtn").addEventListener("click", startVoice);
+  $("againBtn").addEventListener("click", startVoice);
+  $("voiceOrb").addEventListener("click", function () { $("voiceStatus").textContent = "Processando…"; $("voiceOrb").classList.add("idle"); Voice.stop(); });
+  $("voiceCancel").addEventListener("click", cancelVoice);
   $("shareBtn").addEventListener("click", shareList);
   $("fName").addEventListener("input", updatePreview);
   $("checkoutBtn").addEventListener("click", checkout);
@@ -925,12 +981,13 @@
   });
 
   // close overlays on backdrop click / Esc
-  [["overlay", closeItem], ["budgetOverlay", closeBudget], ["calcOverlay", closeCalc], ["checkoutOverlay", closeCheckout], ["histOverlay", closeHist]].forEach(function (pair) {
+  [["overlay", closeItem], ["budgetOverlay", closeBudget], ["calcOverlay", closeCalc], ["checkoutOverlay", closeCheckout], ["histOverlay", closeHist], ["voiceOverlay", cancelVoice]].forEach(function (pair) {
     $(pair[0]).addEventListener("click", function (e) { if (e.target === this) pair[1](); });
   });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
-      if ($("calcOverlay").classList.contains("open")) closeCalc();
+      if ($("voiceOverlay").classList.contains("open")) cancelVoice();
+      else if ($("calcOverlay").classList.contains("open")) closeCalc();
       else if ($("checkoutOverlay").classList.contains("open")) closeCheckout();
       else if ($("histOverlay").classList.contains("open")) closeHist();
       else if ($("budgetOverlay").classList.contains("open")) closeBudget();

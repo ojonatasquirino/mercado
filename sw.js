@@ -1,6 +1,6 @@
 // Mercado App - service worker (offline-first)
-var CACHE = "mercado-v5";
-var ASSETS = ["./", "index.html", "styles.css", "store.js", "app.js", "manifest.json", "icon.svg",
+var CACHE = "mercado-v6";
+var ASSETS = ["./", "index.html", "styles.css", "store.js", "voice.js", "app.js", "manifest.json", "icon.svg",
   "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"];
 
 self.addEventListener("install", function (e) {

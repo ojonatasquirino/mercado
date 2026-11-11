@@ -169,6 +169,13 @@
   <!-- Floating add button -->
   <div class="fab-bar">
     <div class="inner">
+      <button class="btn btn-primary mic-btn" id="micBtn" style="display:none" aria-label="Ditar item por voz">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="2" width="6" height="12" rx="3" />
+          <path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v4" />
+        </svg>
+      </button>
       <button class="btn btn-primary btn-block" id="addBtn" style="height:46px; font-size:.95rem;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
           stroke-linecap="round">
@@ -184,6 +191,7 @@
     <div class="dialog" role="dialog" aria-modal="true">
       <h3 id="dlgTitle">Adicionar item</h3>
       <p class="desc" id="dlgDesc">Informe o nome, a quantidade e o preço unitário.</p>
+      <p class="heard" id="dlgHeard" style="display:none"></p>
       <div class="field">
         <label for="fName">Item</label>
         <input class="input" id="fName" placeholder="Ex.: Arroz 5kg" autocomplete="off" />
@@ -202,6 +210,14 @@
       <div class="preview-line"><span>Subtotal</span><b id="dlgPreview">R$ 0,00</b></div>
       <p class="dlg-delta" id="dlgDelta"></p>
       <div class="dialog-actions">
+        <button class="btn btn-ghost" id="againBtn" style="display:none; margin-right:auto">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="2" width="6" height="12" rx="3" />
+            <path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v4" />
+          </svg>
+          Falar de novo
+        </button>
         <button class="btn btn-outline" id="cancelBtn">Cancelar</button>
         <button class="btn btn-primary" id="saveBtn">Adicionar</button>
       </div>
@@ -295,9 +311,27 @@
     </div>
   </div>
 
+  <!-- Voice listening -->
+  <div class="overlay" id="voiceOverlay">
+    <div class="dialog voice-dialog" role="dialog" aria-modal="true" aria-live="polite">
+      <button class="voice-orb" id="voiceOrb" aria-label="Parar de ouvir">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="2" width="6" height="12" rx="3" />
+          <path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v4" />
+        </svg>
+      </button>
+      <p class="voice-status" id="voiceStatus">Ouvindo…</p>
+      <p class="voice-text" id="voiceText">Fale o item, a quantidade e o preço</p>
+      <p class="voice-hint">Ex.: “arroz 5 quilos, vinte e quatro e noventa”<br>“duas caixas de leite a 5 e 29”</p>
+      <button class="btn btn-outline btn-sm" id="voiceCancel">Cancelar</button>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script src="store.js"></script>
+  <script src="voice.js"></script>
   <script src="app.js"></script>
 </body>
 
