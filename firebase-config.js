@@ -1,13 +1,17 @@
 /*
- * Configuração do Firebase (projeto compartilhado com o app de hábitos "mrdhabitos").
- * Os dados do Mercado ficam em mercado/{uid}, separados dos hábitos.
- * Esta configuração web não é segredo: quem protege os dados são as regras do Firestore.
+ * Cole aqui a configuração do seu projeto Firebase
+ * (Console do Firebase > Configurações do projeto > Seus apps > Web > Configuração).
+ * Enquanto ficar null, o app funciona só no aparelho, sem login.
  */
+window.FIREBASE_CONFIG = null;
+
+/* Exemplo:
 window.FIREBASE_CONFIG = {
-  apiKey: "AIzaSyBgkhgRIlv488K7m-4obC3ngxaU16e5X5U",
-  authDomain: "mrdhabitos.firebaseapp.com",
-  projectId: "mrdhabitos",
-  storageBucket: "mrdhabitos.firebasestorage.app",
-  messagingSenderId: "997416739312",
-  appId: "1:997416739312:web:a1d785e7d7bbe09420fd35"
+  apiKey: "AIza...",
+  authDomain: "mercado-app-xxxx.firebaseapp.com",
+  projectId: "mercado-app-xxxx",
+  storageBucket: "mercado-app-xxxx.appspot.com",
+  messagingSenderId: "000000000000",
+  appId: "1:000000000000:web:xxxxxxxx"
 };
+*/
