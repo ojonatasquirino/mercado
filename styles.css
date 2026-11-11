@@ -1429,3 +1429,9 @@ header.app {
   opacity: .55;
   pointer-events: none;
 }
+
+/* ícone da marca igual ao ícone do app */
+.brand-icon {
+  background: linear-gradient(180deg, #52525b 0%, #18181b 55%, #000 100%) !important;
+  color: #fff !important;
+}
