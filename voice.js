@@ -1,7 +1,6 @@
 /*
  * Voice: ditado de itens em português.
- *  - Voice.parse("arroz cinco quilos vinte e quatro e noventa")
- *      -> { name: "Arroz 5kg", qty: 1, price: 24.9 }
+ *  - Voice.parse("café vinte e sete e noventa") -> { name: "Café", price: 27.9 }
  *  - Voice.listen({ onPartial, onResult, onError, onEnd }) usa a Web Speech API do navegador.
  */
 (function (global) {
@@ -56,16 +55,11 @@
     return out.join(" ");
   }
 
-  /* ---------- parser do item ---------- */
-  var COUNT_UNITS = "unidades?|un|pacotes?|pct|caixas?|cx|latas?|garrafas?|potes?|sacos?|vidros?|bandejas?|d[uú]zias?|fardos?|rolos?|x|vezes";
-  var MEASURE_UNITS = {
-    quilo: "kg", quilos: "kg", kilo: "kg", kilos: "kg", kg: "kg", grama: "g", gramas: "g", g: "g",
-    litro: "L", litros: "L", l: "L", ml: "ml", mililitros: "ml"
-  };
-  var NUM = "(\\d+(?:[.,]\\d+)?)";
-
+  /* ---------- parser: só nome + valor ---------- */
+  // "arroz cinco quilos vinte e quatro e noventa" -> { name: "Arroz 5 quilos", price: 24.9 }
+  // O valor é sempre a última coisa dita; todo o resto é o nome.
+  var NUM = "(\\d+(?:,\\d{1,2})?)";
   function toNum(s) { return parseFloat(String(s).replace(",", ".")); }
-  function fmt(n) { return String(n).replace(".", ","); }
 
   function parse(raw) {
     var t = String(raw || "").toLowerCase()
@@ -74,65 +68,33 @@
       .replace(/(\d)\s*,\s*(\d)/g, "$1,$2")
       .replace(/(\d)\.(\d{2})(?!\d)/g, "$1,$2")
       .replace(/\s+/g, " ").trim();
-    t = wordsToDigits(t)
-      .replace(/(\d+) e meio/g, "$1,5").replace(/(\d+) e meia/g, "$1,5")
-      .replace(/(\d+) (quilos?|kilos?|kg|litros?) e mei[oa]\b/g, "$1,5 $2")
-      .replace(/\bmeio\b|\bmeia\b/g, "0,5");
+    t = wordsToDigits(t).replace(/\s+/g, " ").trim();
 
-    var qtyPor = t.match(/(?:^|\s)(\d+) (?:por|a) (?=\d)/);   // "2 por 19,90" = 2 unidades
-
-    var price = 0, qty = 1, extra = "", m;
-    if (qtyPor) { qty = +qtyPor[1]; t = t.replace(qtyPor[0], " por "); }
-
-    // ---- preço ----
-    var pricePatterns = [
-      [new RegExp("reais_pre " + NUM + "(?: e (\\d{1,2}))?"), function (m) { return toNum(m[1]) + (m[2] ? +m[2] / 100 : 0); }],
-      [new RegExp(NUM + " reais?(?: e (\\d{1,2})(?: centavos?)?)?"), function (m) { return toNum(m[1]) + (m[2] ? +m[2] / 100 : 0); }],
-      [/(\d+) centavos?/, function (m) { return +m[1] / 100; }],
-      [/(?:^|\s)(?:a|por|custa|custando|pre[cç]o|valor|de)?\s*(\d+,\d{1,2})(?!\s*(?:kg|quilo|kilo|litro|l\b|g\b|grama))/, function (m) { return toNum(m[1]); }],
-      [/(?:^|\s)(?:a |por |custa |custando |pre[cç]o |valor )?(\d+) e (\d{1,2})\s*$/, function (m) { return +m[1] + +m[2] / 100; }],
-      [/(?:^|\s)(?:a|por|custa|custando|pre[cç]o|valor) (\d+)\s*$/, function (m) { return +m[1]; }]
+    var price = 0, m;
+    var patterns = [
+      // R$ 24,90 / R$ 24 e 90
+      [new RegExp("reais_pre " + NUM + "(?: e (\\d{1,2}))?(?: centavos?)?\\s*$"), function (m) { return toNum(m[1]) + (m[2] ? +m[2] / 100 : 0); }],
+      // 24 reais e 90 (centavos)
+      [new RegExp(NUM + " reais?(?: e (\\d{1,2})(?: centavos?)?)?\\s*$"), function (m) { return toNum(m[1]) + (m[2] ? +m[2] / 100 : 0); }],
+      // 90 centavos
+      [/(\d+) centavos?\s*$/, function (m) { return +m[1] / 100; }],
+      // 24 e 90
+      [/(\d+) e (\d{1,2})\s*$/, function (m) { return +m[1] + +m[2] / 100; }],
+      // 24,90 ou 24
+      [new RegExp("(?:^|\\s)" + NUM + "\\s*$"), function (m) { return toNum(m[1]); }]
     ];
-    for (var i = 0; i < pricePatterns.length; i++) {
-      m = t.match(pricePatterns[i][0]);
-      if (m) { price = pricePatterns[i][1](m); t = (t.slice(0, m.index) + " " + t.slice(m.index + m[0].length)); break; }
+    for (var i = 0; i < patterns.length; i++) {
+      m = t.match(patterns[i][0]);
+      if (m) { price = patterns[i][1](m); t = t.slice(0, m.index); break; }
     }
 
-    // ---- quantidade por contagem: "2 pacotes", "3x" ----
-    m = t.match(new RegExp(NUM + "\\s*(" + COUNT_UNITS + ")\\b"));
-    if (m) { qty = toNum(m[1]); t = t.replace(m[0], " "); }
-
-    // ---- medida: "5 quilos" vira parte do nome; "1,5 quilo" vira quantidade ----
-    m = t.match(new RegExp(NUM + "\\s*(" + Object.keys(MEASURE_UNITS).join("|") + ")\\b"));
-    if (m) {
-      var n = toNum(m[1]), u = MEASURE_UNITS[m[2]];
-      if (u === "kg" && n % 1 !== 0 && qty === 1) { qty = n; extra = "(kg)"; }
-      else extra = fmt(n) + u;
-      t = t.replace(m[0], " ");
-    }
-
-    // ---- número solto no começo vira quantidade: "2 arroz" ----
-    m = t.match(/^\s*(?:de\s+)?(\d+(?:,\d+)?)\s+(?!e\b)/);
-    if (qtyPor) m = null;
-    if (m && qty === 1) { qty = toNum(m[1]); t = t.replace(m[0], " "); }
-
-    // ---- sobra número solto no fim e ainda sem preço: é o preço ----
-    if (!price) {
-      m = t.match(/\s(\d+(?:,\d{1,2})?)\s*$/);
-      if (m) { price = toNum(m[1]); t = t.slice(0, m.index); }
-    }
-
-    // ---- nome ----
-    // conectivos no meio ficam ("leite de coco"); nas pontas saem
-    var name = t.replace(/reais_pre/g, " ")
-      .replace(/\s+/g, " ").trim()
-      .replace(/^((adiciona(r)?|adicione|coloca(r)?|coloque|bota(r)?|anota(r)?|mais|quero|preciso de|o|os|a|as|um|uma|de|do|da|dos|das|e|por|cada)\s+)+/, "")
-      .replace(/(\s+(de|do|da|o|a|e|por|cada|com|reais?|centavos?))+$/, "")
+    var name = t.replace(/reais_pre/g, " ").replace(/\s+/g, " ").trim()
+      .replace(/^((adiciona(r)?|adicione|coloca(r)?|coloque|bota(r)?|anota(r)?|mais|quero|o|a|um|uma)\s+)+/, "")
+      .replace(/(\s+(de|do|da|a|e|por|custa|custando|pre[cç]o|valor|reais?|no valor de))+$/, "")
       .trim();
-    if (extra) name = (name + " " + extra).trim();
     if (name) name = name.charAt(0).toUpperCase() + name.slice(1);
 
-    return { name: name, qty: qty > 0 ? Math.round(qty * 1000) / 1000 : 1, price: Math.round(price * 100) / 100 };
+    return { name: name, price: Math.round(price * 100) / 100 };
   }
 
   /* ---------- reconhecimento de voz ---------- */

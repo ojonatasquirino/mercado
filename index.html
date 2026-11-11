@@ -206,7 +206,7 @@
         <input class="input" id="fName" placeholder="Ex.: Arroz 5kg" autocomplete="off" />
       </div>
       <div class="row2">
-        <div class="field">
+        <div class="field" id="qtyField">
           <label for="fQty">Quantidade</label>
           <input class="input" id="fQty" type="text" inputmode="decimal" value="1" autocomplete="off" />
         </div>
@@ -387,8 +387,8 @@
         </svg>
       </button>
       <p class="voice-status" id="voiceStatus">Ouvindo…</p>
-      <p class="voice-text" id="voiceText">Fale o item, a quantidade e o preço</p>
-      <p class="voice-hint">Ex.: “arroz 5 quilos, vinte e quatro e noventa”<br>“duas caixas de leite a 5 e 29”</p>
+      <p class="voice-text" id="voiceText">Fale o nome do item e o valor</p>
+      <p class="voice-hint">Ex.: “café, vinte e sete e noventa”<br>“leite condensado 6,49”</p>
       <button class="btn btn-outline btn-sm" id="voiceCancel">Cancelar</button>
     </div>
   </div>

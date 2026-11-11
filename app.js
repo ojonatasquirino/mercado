@@ -281,6 +281,7 @@
     editingId = id || null;
     $("dlgHeard").style.display = voice ? "" : "none";
     $("againBtn").style.display = voice ? "" : "none";
+    $("qtyField").style.display = voice ? "none" : "";
     var it = id ? find(id) : null;
     $("dlgTitle").textContent = it ? "Editar item" : "Adicionar item";
     $("dlgDesc").textContent = it ? "Atualize a quantidade ou o preço." : "Informe o nome, a quantidade e o preço unitário.";
@@ -295,7 +296,7 @@
       $("dlgHeard").textContent = "“" + voice.text + "”";
       $("saveBtn").textContent = ex ? "Atualizar" : "Adicionar";
       $("fName").value = ex ? ex.name : voice.name;
-      $("fQty").value = fmtNum(voice.qty !== 1 || !ex ? voice.qty : ex.qty);
+      $("fQty").value = fmtNum(ex ? ex.qty : 1);
       $("fPrice").value = fmtMoney(voice.price);
     }
     updatePreview();
@@ -319,10 +320,34 @@
     "start": "Não consegui abrir o microfone"
   };
   var voiceErr = null;
+  var MIC_KEY = "mercado_mic_ok";
+  function micGranted() { try { return localStorage.getItem(MIC_KEY) === "1"; } catch (e) { return false; } }
+  // Pede o microfone uma única vez com getUserMedia. Depois disso o navegador
+  // guarda a permissão do site e o ditado abre direto, sem perguntar de novo.
+  function ensureMic() {
+    if (micGranted() || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return Promise.resolve();
+    return navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+      stream.getTracks().forEach(function (tr) { tr.stop(); });
+      try { localStorage.setItem(MIC_KEY, "1"); } catch (e) { }
+    });
+  }
+  if (navigator.permissions && navigator.permissions.query) {
+    navigator.permissions.query({ name: "microphone" }).then(function (st) {
+      var sync = function () { try { localStorage.setItem(MIC_KEY, st.state === "granted" ? "1" : "0"); } catch (e) { } };
+      sync(); st.onchange = sync;
+    }).catch(function () { });
+  }
   function startVoice() {
+    if (!micGranted()) {
+      ensureMic().then(startVoice2).catch(function () { toast(VOICE_ERRORS["not-allowed"]); });
+      return;
+    }
+    startVoice2();
+  }
+  function startVoice2() {
     closeItem();
     voiceErr = null;
-    $("voiceText").textContent = "Fale o item, a quantidade e o preço";
+    $("voiceText").textContent = "Fale o nome do item e o valor";
     $("voiceStatus").textContent = "Ouvindo…";
     $("voiceOrb").classList.remove("idle");
     $("voiceOverlay").classList.add("open");
